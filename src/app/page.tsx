@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import TerminalHistory, { TerminalEntry } from "@/components/TerminalHistory";
 import { useState } from "react";
 
@@ -57,8 +58,8 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] flex flex-col justify-between h-full">
-      <main className="flex flex-col gap-[32px] items-center sm:items-start w-full max-w-2xl">
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1 w-full gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] flex flex-col items-center sm:items-start">
         <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
           Aventure Terminale
         </h1>
@@ -66,13 +67,14 @@ export default function Home() {
         <TerminalHistory history={history} />
       </main>
 
-      <footer className="flex gap-2 flex-wrap items-center justify-center w-full">
+      <footer className="sticky bottom-20 w-full bg-background flex flex-col gap-4">
+        <Separator className="w-full" />
         <Input
           value={currentInput}
           onChange={(e) => setCurrentInput(e.target.value)}
           onKeyDown={handleKeyPress}
           placeholder="Que faites-vous ?"
-          className="w-full"
+          className="w-full font-[family-name:var(--font-syne-mono)]"
           autoFocus
         />
       </footer>
