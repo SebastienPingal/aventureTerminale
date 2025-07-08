@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Syne_Mono, Zen_Dots } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const zenDots = Zen_Dots({
+  variable: "--font-zen-dots",
   subsets: ["latin"],
+  weight: ["400"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const syneMono = Syne_Mono({
+  variable: "--font-syne-mono",
   subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${zenDots.variable} ${syneMono.variable} antialiased flex flex-col items-center justify-center max-w-6xl mx-auto`}
       >
         {children}
       </body>
