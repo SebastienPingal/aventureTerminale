@@ -34,4 +34,6 @@ model WorldCell {
   description  String
   title        String
   users        User[]
+
+  @@unique([x, y])
 }
