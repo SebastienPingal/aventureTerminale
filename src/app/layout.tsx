@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne_Mono, Zen_Dots } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const zenDots = Zen_Dots({
   variable: "--font-zen-dots",
@@ -25,11 +26,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${zenDots.variable} ${syneMono.variable} antialiased flex flex-col items-center justify-center max-w-6xl mx-auto`}
+        className={`${zenDots.variable} ${syneMono.variable} antialiased`}
       >
-        {children}
+        <div className="flex flex-col items-center max-w-6xl mx-auto min-h-screen">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
