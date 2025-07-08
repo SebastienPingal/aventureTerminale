@@ -25,12 +25,13 @@ model User {
 }
 
 model WorldCell {
-  id          String   @id @default(uuid())
-  x           Int
-  y           Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  description String
-  title       String
-  users       User[]
+  id           String   @id @default(uuid())
+  x            Int
+  y            Int
+  mapCharacter String   @db.Char(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  description  String
+  title        String
+  users        User[]
 }
