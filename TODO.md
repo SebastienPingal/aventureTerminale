@@ -1,0 +1,2 @@
+- [ ] bdd
+- [ ] connexion au llm
