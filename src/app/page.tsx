@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col">
-      <header className="bg-background w-full pt-10 px-4 sm:px-20">
+      <header className="bg-background w-full pt-5 px-4">
         <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
           Aventure Terminale
         </h1>
@@ -71,7 +71,7 @@ export default function Home() {
         <Journal history={history} />
       </main>
 
-      <footer className="bg-background w-full flex flex-col gap-4 pb-4 px-4 sm:px-20">
+      <footer className="bg-background w-full flex flex-col gap-4 pb-4 px-4">
         <Separator className="w-full" />
 
         <Input

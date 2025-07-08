@@ -3,29 +3,30 @@
 import { useRef, useEffect } from "react";
 
 export interface JournalEntry {
-  type: 'command' | 'response';
-  content: string;
+  type: 'command' | 'response'
+  content: string
 }
 
 interface JournalProps {
-  history: JournalEntry[];
+  history: JournalEntry[]
 }
 
 export default function Journal({ history }: JournalProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [history]);
+  }, [history])
 
   return (
     <div
       ref={scrollRef}
       className="h-full w-full overflow-y-auto font-[family-name:var(--font-syne-mono)] flex flex-col"
     >
-      <div className="flex-1"></div>
+      <div className="flex-1" />
+
       <div className="space-y-2 p-4">
         {history.map((entry, index) => (
           <div key={index}>
@@ -33,6 +34,7 @@ export default function Journal({ history }: JournalProps) {
               <blockquote className="font-bold border-l-4 border-primary pl-4 italic opacity-80">
                 {entry.content}
               </blockquote>
+
             ) : (
               <div>
                 {entry.content}
