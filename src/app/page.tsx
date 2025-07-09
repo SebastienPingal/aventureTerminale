@@ -5,7 +5,8 @@ import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
 import { ToggleTheme } from "@/components/ToggleTheme"
-import AsciiMap from "@/components/Journal/AsciiMap"
+import { createWorldCell } from "@/app/actions/worldCell"
+import { useWorldCellStore } from "@/stores/worldCellStore"
 
 export default function Home() {
   const [currentInput, setCurrentInput] = useState("")
@@ -52,7 +53,7 @@ export default function Home() {
 
     setHistory(prev => [...prev, newEntry, responseEntry])
     setCurrentInput("")
-  };
+  }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -89,5 +90,5 @@ export default function Home() {
         />
       </footer>
     </div>
-  );
+  )
 }
