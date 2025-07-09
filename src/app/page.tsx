@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
 import { ToggleTheme } from "@/components/ToggleTheme"
+import AsciiMap from "@/components/Journal/AsciiMap"
 
 export default function Home() {
   const [currentInput, setCurrentInput] = useState("")

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import AsciiMap from "./Journal/AsciiMap";
 
 export interface JournalEntry {
   type: 'command' | 'response'
@@ -42,6 +43,7 @@ export default function Journal({ history }: JournalProps) {
             )}
           </div>
         ))}
+        <AsciiMap />
       </div>
     </div>
   )
