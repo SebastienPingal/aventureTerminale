@@ -5,11 +5,11 @@ import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
 import { ToggleTheme } from "@/components/ToggleTheme"
-import { createWorldCell } from "@/app/actions/worldCell"
-import { useWorldCellStore } from "@/stores/worldCellStore"
+import { generateWorldCell } from "./actions/generation"
 
 export default function Home() {
   const [currentInput, setCurrentInput] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const [history, setHistory] = useState<JournalEntry[]>([
     {
@@ -18,7 +18,7 @@ export default function Home() {
     }
   ])
 
-  const handleCommand = (command: string) => {
+  const handleCommand = async (command: string) => {
     if (!command.trim()) return
 
     const newEntry: JournalEntry = {
@@ -28,22 +28,44 @@ export default function Home() {
 
     let response = ''
 
-    switch (command.toLowerCase().trim()) {
-      case 'help':
-        response = 'Commandes disponibles: help, about, clear'
-        break;
+    try {
+      switch (command.toLowerCase().trim()) {
+        case 'help':
+          response = 'Commandes disponibles: help, clear, generate'
+          break;
 
-      case 'about':
-        response = 'Votre assistant pour les projets de terminale'
-        break;
+        case 'generate':
+          setIsGenerating(true)
+          
+          // Add loading entry
+          const loadingEntry: JournalEntry = {
+            type: 'response',
+            content: 'Vous marchez ...'
+          }
+          setHistory(prev => [...prev, newEntry, loadingEntry])
+          
+          try {
+            const worldCell = await generateWorldCell()
+            response = `🏞️ **${worldCell.title}** (${worldCell.rarity})\n${worldCell.description}\nCaractère sur la carte: ${worldCell.mapCharacter}`
+          } catch (error) {
+            console.error('❌ Error generating world cell:', error)
+            response = '❌ Erreur lors de la génération du lieu. Veuillez réessayer.'
+          } finally {
+            setIsGenerating(false)
+          }
+          break;
 
-      case 'clear':
-        setHistory([newEntry])
-        setCurrentInput("")
-        return
+        case 'clear':
+          setHistory([newEntry])
+          setCurrentInput("")
+          return
 
-      default:
-        response = `Commande "${command}" non reconnue`
+        default:
+          response = `❓ Commande "${command}" non reconnue`
+      }
+    } catch (error) {
+      console.error('❌ Error handling command:', error)
+      response = '❌ Une erreur est survenue.'
     }
 
     const responseEntry: JournalEntry = {
@@ -51,7 +73,13 @@ export default function Home() {
       content: response
     }
 
-    setHistory(prev => [...prev, newEntry, responseEntry])
+    // For generate command, replace the loading message
+    if (command.toLowerCase().trim() === 'generate') {
+      setHistory(prev => [...prev.slice(0, -1), responseEntry])
+    } else {
+      setHistory(prev => [...prev, newEntry, responseEntry])
+    }
+    
     setCurrentInput("")
   }
 
@@ -84,9 +112,10 @@ export default function Home() {
           value={currentInput}
           onChange={(e) => setCurrentInput(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Que faites-vous ?"
+          placeholder={isGenerating ? "Génération en cours..." : "Que faites-vous ?"}
           className="w-full font-[family-name:var(--font-syne-mono)]"
           autoFocus
+          disabled={isGenerating}
         />
       </footer>
     </div>

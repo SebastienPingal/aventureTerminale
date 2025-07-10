@@ -29,6 +29,7 @@ model WorldCell {
   x            Int
   y            Int
   mapCharacter String   @db.Char(1)
+  rarity       String   @default("commun")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   description  String
