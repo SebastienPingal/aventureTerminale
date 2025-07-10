@@ -1,6 +1,6 @@
 "use server"
 
-import { RARITY_WEIGHTS, RARITY_EXPLANATIONS } from "@/lib/constants/world"
+import { RARITY_WEIGHTS, RARITY_EXPLANATIONS, REALISTIC_RARITIES } from "@/lib/constants/world"
 import { GENERATION_CONFIG } from "@/lib/constants/ai"
 import Together from "together-ai"
 
@@ -32,7 +32,7 @@ export async function generateWorldCell(): Promise<{
   console.log('🚜 rarityExplanation', rarityExplanation)
 
   // 🏗️ Adapter le ton selon la rareté
-  const isRealistic = GENERATION_CONFIG.REALISTIC_RARITIES.includes(rarity)
+  const isRealistic = REALISTIC_RARITIES.includes(rarity)
   const mysticalInstruction = isRealistic
     ? "RESTE ANCRÉ DANS LA RÉALITÉ. Évite tout élément fantastique, magique ou surnaturel. Le lieu doit être plausible dans notre monde abandonné."
     : "Tu peux ajouter des éléments mystiques et oniriques pour ce niveau de rareté."

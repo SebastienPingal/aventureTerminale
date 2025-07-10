@@ -17,6 +17,7 @@ export const RARITY_EXPLANATIONS = {
   "légendaire": "Un lieu legendaire, avec énormément d'intérêt qui apporte une dimension plus mystique et qui peut influencer les lieux environnants, ou etre a l'origine d'un évenement. Exemple : Un rituel de magie encore en cours qui fait perdre progressivement des couleurs aux lieux environnants, un maison avec des apparitions, une école ou l'on entend des enfants mais on ne les voit jamais et qui se balade dans les lieux environnants..."
 } as const
 
+export const REALISTIC_RARITIES = ['commun', 'peu commun', 'rare']
 
 // 🎨 Random elements for generation diversity (commented for future use)
 export const GENERATION_ELEMENTS = {
