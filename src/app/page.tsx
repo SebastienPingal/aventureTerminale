@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
-import { ToggleTheme } from "@/components/ToggleTheme"
 import { generateWorldCell } from "../actions/generation"
 
 export default function Home() {
@@ -91,16 +90,6 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col">
-      <header className="bg-background w-full pt-5 px-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
-            Aventure Terminale
-          </h1>
-          <ToggleTheme />
-        </div>
-        <Separator className="w-full" />
-      </header>
-
       <main className="flex-1 font-[family-name:var(--font-geist-sans)] overflow-hidden">
         <Journal history={history} />
       </main>

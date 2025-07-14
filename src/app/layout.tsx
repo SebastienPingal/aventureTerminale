@@ -3,6 +3,8 @@ import { Syne_Mono, Zen_Dots } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthSessionProvider } from "@/components/SessionProvider";
+import { Separator } from "@/components/ui/separator";
+import { ToggleTheme } from "@/components/ToggleTheme";
 
 const zenDots = Zen_Dots({
   variable: "--font-zen-dots",
@@ -29,8 +31,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${zenDots.variable} ${syneMono.variable} antialiased`}
+        className={`${zenDots.variable} ${syneMono.variable} antialiased h-screen overflow-hidden relative`}
       >
+        <header className="bg-background w-full pt-5 px-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
+              Aventure Terminale
+            </h1>
+            <ToggleTheme />
+          </div>
+          <Separator className="w-full" />
+        </header>
         <div className="flex flex-col items-center max-w-6xl mx-auto min-h-screen">
           <AuthSessionProvider >
             <ThemeProvider
