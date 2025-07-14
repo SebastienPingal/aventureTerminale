@@ -3,7 +3,18 @@
 - connexion au llm
   - use mistral
 
-- Map
-  - firt generate a grid of 5x5
-  - try to display it with a specific conponent AsciiMap
-  - then allow fpor the map to display not existing cells (cell not yet discovered)
+- auth
+- user
+
+- generation :
+  - generate a world cell, using a rarety system as an input
+    - on certain cases, the woldcell could be influenced by the player prompt.
+    - or by nearby worldcells.
+  - generate the description of a world cell for the player
+  - generate the consequences of the action of the player
+    - on the worldcell
+    - on other worldcells
+    - on the player position
+    - on the player inventory
+    - on the player state
+  - generate periodical events altering the weather and the worldcells
