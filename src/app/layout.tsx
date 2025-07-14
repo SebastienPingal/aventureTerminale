@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne_Mono, Zen_Dots } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthSessionProvider } from "@/components/SessionProvider";
 
 const zenDots = Zen_Dots({
   variable: "--font-zen-dots",
@@ -31,14 +32,16 @@ export default function RootLayout({
         className={`${zenDots.variable} ${syneMono.variable} antialiased`}
       >
         <div className="flex flex-col items-center max-w-6xl mx-auto min-h-screen">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+          <AuthSessionProvider >
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </AuthSessionProvider>
         </div>
       </body>
     </html>

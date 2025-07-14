@@ -5,7 +5,16 @@ const globalForPrisma = global as unknown as {
     prisma: PrismaClient
 }
 
-const prisma = globalForPrisma.prisma || new PrismaClient().$extends(withAccelerate())
+// Use edge-compatible client for middleware
+const createPrismaClient = () => {
+    if (typeof window !== 'undefined') {
+        throw new Error('PrismaClient should not be used in the browser')
+    }
+    
+    return new PrismaClient().$extends(withAccelerate())
+}
+
+const prisma = globalForPrisma.prisma || createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
