@@ -33,27 +33,27 @@ export default function RootLayout({
       <body
         className={`${zenDots.variable} ${syneMono.variable} antialiased h-screen overflow-hidden relative`}
       >
-        <header className="bg-background w-full pt-5 px-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
-              Aventure Terminale
-            </h1>
-            <ToggleTheme />
-          </div>
-          <Separator className="w-full" />
-        </header>
-        <div className="flex flex-col items-center max-w-6xl mx-auto min-h-screen">
-          <AuthSessionProvider >
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+        <AuthSessionProvider >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header className="bg-background w-full pt-5 px-4">
+              <div className="flex justify-between items-center max-w-6xl mx-auto">
+                <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
+                  Aventure Terminale
+                </h1>
+                <ToggleTheme />
+              </div>
+              <Separator className="w-full" />
+            </header>
+            <div className="flex flex-col items-center max-w-6xl mx-auto min-h-screen">
               {children}
-            </ThemeProvider>
-          </AuthSessionProvider>
-        </div>
+            </div>
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );

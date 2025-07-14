@@ -26,8 +26,8 @@ model User {
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  worldCell   WorldCell @relation(fields: [worldCellId], references: [id])
-  worldCellId String
+  worldCell   WorldCell? @relation(fields: [worldCellId], references: [id])
+  worldCellId String?
 }
 
 model WorldCell {
