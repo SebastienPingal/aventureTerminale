@@ -30,7 +30,7 @@ export default function Login() {
       </div>
 
       <p className="text-sm text-muted-foreground mt-4 text-center">
-        Choisissez votre méthode de connexion pour commencer l'aventure
+        Choisissez votre méthode de connexion pour commencer l&apos;aventure
       </p>
     </div>
   )
