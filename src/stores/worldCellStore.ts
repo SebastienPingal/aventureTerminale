@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { WorldCell } from '@/lib/types'
-import { fetchWorldCells } from '@/app/actions/worldCell'
+import { fetchWorldCells } from '@/actions/worldCell'
 
 interface WorldCellState {
   worldCells: WorldCell[]

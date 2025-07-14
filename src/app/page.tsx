@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
 import { ToggleTheme } from "@/components/ToggleTheme"
-import { generateWorldCell } from "./actions/generation"
+import { generateWorldCell } from "../actions/generation"
 
 export default function Home() {
   const [currentInput, setCurrentInput] = useState("")
