@@ -89,7 +89,7 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-full flex flex-col grow">
       <main className="flex-1 font-[family-name:var(--font-geist-sans)] overflow-hidden">
         <Journal history={history} />
       </main>

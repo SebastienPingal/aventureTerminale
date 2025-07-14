@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthSessionProvider } from "@/components/SessionProvider";
 import { Separator } from "@/components/ui/separator";
 import { ToggleTheme } from "@/components/ToggleTheme";
+import { auth } from "@/auth";
 
 const zenDots = Zen_Dots({
   variable: "--font-zen-dots",
@@ -23,15 +24,17 @@ export const metadata: Metadata = {
   description: "Aventure Terminale",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await auth()
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${zenDots.variable} ${syneMono.variable} antialiased h-screen overflow-hidden relative`}
+        className={`${zenDots.variable} ${syneMono.variable} antialiased h-screen overflow-hidden relative flex flex-col`}
       >
         <AuthSessionProvider >
           <ThemeProvider
@@ -45,11 +48,15 @@ export default function RootLayout({
                 <h1 className="text-4xl font-bold font-[family-name:var(--font-zen-dots)]">
                   Aventure Terminale
                 </h1>
-                <ToggleTheme />
+                <div className="flex items-center gap-2">
+                  {session && <p>{session.user?.name}</p>}
+                  <ToggleTheme />
+                </div>
               </div>
               <Separator className="w-full" />
             </header>
-            <div className="flex flex-col items-center max-w-6xl mx-auto min-h-screen">
+
+            <div className="flex flex-col items-center max-w-6xl mx-auto flex-1 overflow-y-auto">
               {children}
             </div>
           </ThemeProvider>
