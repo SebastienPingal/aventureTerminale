@@ -1,3 +1,5 @@
+"use server"
+
 import { Prisma } from "@/app/generated/prisma"
 import prisma from "@/lib/prisma"
 import { User } from "@/lib/types"
@@ -6,7 +8,7 @@ export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<User | n
   const user = await prisma.user.findUnique({
     where: id,
   })
-
+ 
   return user
 }
 
