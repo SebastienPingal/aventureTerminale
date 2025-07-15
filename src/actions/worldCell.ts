@@ -5,8 +5,8 @@ import { WorldCell } from "@/lib/types"
 
 export async function fetchWorldCells(): Promise<WorldCell[]> {
   try {
-    console.log("🗺️  Fetching world cells from database...")
-    
+    console.log("🗺️ Fetching world cells from database...")
+
     const cells = await prisma.worldCell.findMany({
       orderBy: [
         { y: 'asc' },
@@ -15,7 +15,7 @@ export async function fetchWorldCells(): Promise<WorldCell[]> {
     })
 
     console.log(`✅ Successfully fetched ${cells.length} world cells`)
-    
+
     return cells.map(cell => ({
       ...cell,
       createdAt: new Date(cell.createdAt),
@@ -35,7 +35,7 @@ export async function fetchWorldCellsInArea(
 ): Promise<WorldCell[]> {
   try {
     console.log(`🔍 Fetching world cells in area: (${minX},${minY}) to (${maxX},${maxY})`)
-    
+
     const cells = await prisma.worldCell.findMany({
       where: {
         x: {
@@ -54,7 +54,7 @@ export async function fetchWorldCellsInArea(
     })
 
     console.log(`✅ Successfully fetched ${cells.length} world cells in area`)
-    
+
     return cells.map(cell => ({
       ...cell,
       createdAt: new Date(cell.createdAt),
@@ -74,8 +74,8 @@ export async function createWorldCell(
   description: string
 ): Promise<WorldCell> {
   try {
-    console.log(`🏗️  Creating new world cell at (${x},${y}) with character '${mapCharacter}'`)
-    
+    console.log(`🏗️ Creating new world cell at (${x},${y}) with character '${mapCharacter}'`)
+
     const cell = await prisma.worldCell.create({
       data: {
         x,
@@ -87,7 +87,7 @@ export async function createWorldCell(
     })
 
     console.log(`✅ Successfully created world cell: ${cell.title}`)
-    
+
     return {
       ...cell,
       createdAt: new Date(cell.createdAt),
@@ -97,4 +97,4 @@ export async function createWorldCell(
     console.error("❌ Error creating world cell:", error)
     throw new Error("Failed to create world cell")
   }
-} 
+}

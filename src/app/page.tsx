@@ -5,17 +5,12 @@ import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
 import { generateWorldCell } from "../actions/generation"
+import { useHistoryStore } from "@/stores/historyStore"
 
 export default function Home() {
+  const { history, addEntry } = useHistoryStore()
   const [currentInput, setCurrentInput] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
-
-  const [history, setHistory] = useState<JournalEntry[]>([
-    {
-      type: 'response',
-      content: "Bienvenue sur l'aventure terminale. Rejoignez, découvrez un monde persistant. Peut-être croiserez vous d'autre voyageurs."
-    }
-  ])
 
   const handleCommand = async (command: string) => {
     if (!command.trim()) return
@@ -35,14 +30,13 @@ export default function Home() {
 
         case 'generate':
           setIsGenerating(true)
-          
-          // Add loading entry
+
           const loadingEntry: JournalEntry = {
             type: 'response',
             content: 'Vous marchez ...'
           }
-          setHistory(prev => [...prev, newEntry, loadingEntry])
-          
+          addEntry(loadingEntry)
+
           try {
             const worldCell = await generateWorldCell()
             response = `🏞️ **${worldCell.title}** (${worldCell.rarity})\n${worldCell.description}\nCaractère sur la carte: ${worldCell.mapCharacter}`
@@ -55,7 +49,7 @@ export default function Home() {
           break;
 
         case 'clear':
-          setHistory([newEntry])
+          addEntry(newEntry)
           setCurrentInput("")
           return
 
@@ -72,13 +66,12 @@ export default function Home() {
       content: response
     }
 
-    // For generate command, replace the loading message
     if (command.toLowerCase().trim() === 'generate') {
-      setHistory(prev => [...prev.slice(0, -1), responseEntry])
+      addEntry(responseEntry)
     } else {
-      setHistory(prev => [...prev, newEntry, responseEntry])
+      addEntry(responseEntry)
     }
-    
+
     setCurrentInput("")
   }
 

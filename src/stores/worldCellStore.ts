@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { WorldCell } from '@/lib/types'
-import { fetchWorldCells } from '@/actions/worldCell'
+import { fetchWorldCells, fetchWorldCellsInArea, createWorldCell } from '@/actions/worldCell'
 
 interface WorldCellState {
   worldCells: WorldCell[]
@@ -14,6 +14,8 @@ interface WorldCellState {
   updateWorldCell: (cell: WorldCell) => void
   getWorldCellAt: (x: number, y: number) => WorldCell | undefined
   loadWorldCells: () => Promise<void>
+  loadWorldCellsInArea: (minX: number, maxX: number, minY: number, maxY: number) => Promise<void>
+  createNewWorldCell: (x: number, y: number, mapCharacter: string, title: string, description: string) => Promise<WorldCell | null>
   reset: () => void
 }
 
@@ -59,6 +61,51 @@ export const useWorldCellStore = create<WorldCellState>((set, get) => ({
     } catch (err) {
       console.error("❌ Failed to load world cells:", err)
       setError(err instanceof Error ? err.message : 'Failed to load world cells')
+    } finally {
+      setLoading(false)
+    }
+  },
+
+  loadWorldCellsInArea: async (minX, maxX, minY, maxY) => {
+    const { setLoading, setError, setWorldCells } = get()
+    
+    setLoading(true)
+    setError(null)
+    
+    try {
+      console.log("🔍 Loading world cells in area with Zustand...")
+      const cells = await fetchWorldCellsInArea(minX, maxX, minY, maxY)
+      setWorldCells(cells)
+      console.log(`✅ Successfully loaded ${cells.length} world cells in area`)
+    } catch (err) {
+      console.error("❌ Failed to load world cells in area:", err)
+      setError(err instanceof Error ? err.message : 'Failed to load world cells in area')
+    } finally {
+      setLoading(false)
+    }
+  },
+
+  createNewWorldCell: async (x, y, mapCharacter, title, description) => {
+    const { setLoading, setError } = get()
+    
+    setLoading(true)
+    setError(null)
+    
+    try {
+      console.log("🏗️ Creating new world cell with Zustand...")
+      const newCell = await createWorldCell(x, y, mapCharacter, title, description)
+      
+      // Add the new cell to the store
+      set((state) => ({
+        worldCells: [...state.worldCells, newCell]
+      }))
+      
+      console.log(`✅ Successfully created world cell: ${newCell.title}`)
+      return newCell
+    } catch (err) {
+      console.error("❌ Failed to create world cell:", err)
+      setError(err instanceof Error ? err.message : 'Failed to create world cell')
+      return null
     } finally {
       setLoading(false)
     }
