@@ -33,8 +33,10 @@ export default function Journal({ history }: JournalProps) {
           <div key={index}>
 
             {entry.type === 'command' ? (
-              <blockquote className="italic opacity-80">
-                <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">{entry.content}</pre>
+              <blockquote className="italic border-l-4 border-primary pl-4">
+                <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                  {entry.content}
+                </pre>
               </blockquote>
 
             ) : entry.type === 'system' ? (

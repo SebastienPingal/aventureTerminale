@@ -23,6 +23,8 @@ export default function Home() {
     let response = ''
 
     try {
+      addEntry(newEntry)
+
       switch (command.toLowerCase().trim()) {
         case 'help':
           response = 'Commandes disponibles: help, clear, generate'
@@ -39,10 +41,10 @@ export default function Home() {
 
           try {
             const worldCell = await generateWorldCell()
-            response = `🏞️ **${worldCell.title}** (${worldCell.rarity})\n${worldCell.description}\nCaractère sur la carte: ${worldCell.mapCharacter}`
+            response = `${worldCell.title} (${worldCell.rarity})\n${worldCell.description}\nCaractère sur la carte: ${worldCell.mapCharacter}`
           } catch (error) {
             console.error('❌ Error generating world cell:', error)
-            response = '❌ Erreur lors de la génération du lieu. Veuillez réessayer.'
+            response = 'Erreur lors de la génération du lieu. Veuillez réessayer.'
           } finally {
             setIsGenerating(false)
           }
@@ -54,11 +56,11 @@ export default function Home() {
           return
 
         default:
-          response = `❓ Commande "${command}" non reconnue`
+          response = `Commande "${command}" non reconnue`
       }
     } catch (error) {
       console.error('❌ Error handling command:', error)
-      response = '❌ Une erreur est survenue.'
+      response = 'Une erreur est survenue.'
     }
 
     const responseEntry: JournalEntry = {
@@ -82,8 +84,8 @@ export default function Home() {
   }
 
   return (
-    <div className="h-full flex flex-col grow">
-      <main className="flex-1 font-[family-name:var(--font-geist-sans)] overflow-hidden">
+    <div className="h-full flex flex-col grow w-full">
+      <main className="flex-1 font-[family-name:var(--font-geist-sans)] overflow-hidden w-full">
         <Journal history={history} />
       </main>
 
