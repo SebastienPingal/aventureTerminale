@@ -1,4 +1,4 @@
-import { getUser, updateUser } from "@/actions/user"
+import { getMe, getUser, updateUser } from "@/actions/user"
 import { Prisma, User } from "@/app/generated/prisma"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { create } from "zustand"
@@ -8,12 +8,13 @@ interface UserState {
   loading: boolean
   error: string | null
 
-  setUser: (user: User) => void
+  setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 
   getUser: (id: Prisma.UserWhereUniqueInput) => Promise<void>
   updateUser: (id: Prisma.UserWhereUniqueInput, data: Prisma.UserUpdateInput) => Promise<void>
+  getMe: () => Promise<void>
 }
 
 export const useUserStore = create<UserState>()(
@@ -31,6 +32,7 @@ export const useUserStore = create<UserState>()(
         try {
           const user = await getUser(id)
           set({ user })
+
         } catch (error) {
           set({ error: error as string })
         }
@@ -43,6 +45,11 @@ export const useUserStore = create<UserState>()(
         } catch (error) {
           set({ error: error as string })
         }
+      },
+
+      getMe: async () => {
+        const user = await getMe()
+        set({ user })
       },
     }),
     {
