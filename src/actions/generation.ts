@@ -1,24 +1,11 @@
 "use server"
 
-import { RARITY_WEIGHTS, RARITY_EXPLANATIONS, REALISTIC_RARITIES } from "@/lib/constants/world"
+import { RARITY_EXPLANATIONS, REALISTIC_RARITIES } from "@/lib/constants/world"
 import { GENERATION_CONFIG } from "@/lib/constants/ai"
 import Together from "together-ai"
+import { randomRarity } from "@/lib/helper"
 
 const together = new Together()
-
-function randomRarity(): string {
-  const totalWeight = Object.values(RARITY_WEIGHTS).reduce((sum, weight) => sum + weight, 0)
-  let random = Math.random() * totalWeight
-
-  for (const [rarity, weight] of Object.entries(RARITY_WEIGHTS)) {
-    random -= weight
-    if (random <= 0) {
-      return rarity as keyof typeof RARITY_WEIGHTS
-    }
-  }
-
-  return "commun"
-}
 
 export async function generateWorldCell(): Promise<{
   title: string
