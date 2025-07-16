@@ -1,10 +1,7 @@
 - bdd
 
-- connexion au llm
-  - use mistral
-
-- auth
 - user
+  - integrer le nom du joueur
 
 - generation :
   - generate a world cell, using a rarety system as an input
@@ -18,3 +15,15 @@
     - on the player inventory
     - on the player state
   - generate periodical events altering the weather and the worldcells
+
+### En cours
+
+- [ ] interpreter le prompt du joueur
+  - [ ] déduire l'action du joueur
+  - [ ] générer un lieu
+  - [ ] générer une narration
+
+### A faire ensuite
+
+- [ ] placer le joueur dans le monde (randomly)
+  - [ ] générer un lieu si nécéssaire a ce moment là

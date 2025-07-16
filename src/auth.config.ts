@@ -12,6 +12,22 @@ export const authConfig = {
       // Simple auth check without database queries
       return !!auth
     },
+    
+    // Add this callback to map JWT token to session
+    session: async ({ session, token }) => {
+      if (token?.sub) {
+        session.user.id = token.sub
+      }
+      return session
+    },
+    
+    // Add this callback to ensure user ID is in the JWT token
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.sub = user.id
+      }
+      return token
+    },
   },
   
   pages: {

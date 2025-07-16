@@ -1,20 +1,22 @@
 import { getMe, getUser, updateUser } from "@/actions/user"
-import { Prisma, User } from "@/app/generated/prisma"
+import { Prisma } from "@/app/generated/prisma"
+import { ExtendedUser, WorldCell } from "@/lib/types"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { create } from "zustand"
 
 interface UserState {
-  user: User | null
+  user: ExtendedUser | null
   loading: boolean
   error: string | null
 
-  setUser: (user: User | null) => void
+  setUser: (user: ExtendedUser | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 
   getUser: (id: Prisma.UserWhereUniqueInput) => Promise<void>
   updateUser: (id: Prisma.UserWhereUniqueInput, data: Prisma.UserUpdateInput) => Promise<void>
   getMe: () => Promise<void>
+  moveUser: (direction: string, worldCell?: Partial<WorldCell>) => Promise<void>
 }
 
 export const useUserStore = create<UserState>()(
@@ -50,6 +52,26 @@ export const useUserStore = create<UserState>()(
       getMe: async () => {
         const user = await getMe()
         set({ user })
+      },
+
+      moveUser: async (direction: string) => {
+        const { user } = useUserStore.getState()
+
+        if (!user || !user.worldCell) {
+          console.error("User or world cell not found")
+          return
+        }
+
+        let newX = user.worldCell.x
+        let newY = user.worldCell.y
+
+        if (direction === 'north') newY++
+        if (direction === 'south') newY--
+        if (direction === 'east') newX++
+        if (direction === 'west') newX--
+
+        updateUser({ id: user.id }, { worldCell: { connect: { x_y: { x: newX, y: newY } } } })
+
       },
     }),
     {

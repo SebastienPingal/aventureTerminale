@@ -1,107 +1,104 @@
 "use client"
 
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import Journal, { JournalEntry } from "@/components/Journal"
 import { useState } from "react"
-import { generateWorldCell } from "../actions/generation"
+import { processPrompt } from "../actions/promptProcessor"
+import { executeCommand } from "@/lib/commands"
 import { useHistoryStore } from "@/stores/historyStore"
+import { useUserStore } from "@/stores/userStore"
 
 export default function Home() {
   const { history, addEntry } = useHistoryStore()
   const [currentInput, setCurrentInput] = useState("")
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const { user } = useUserStore()
 
-  const handleCommand = async (command: string) => {
-    if (!command.trim()) return
+  const handlePrompt = async (prompt: string) => {
+    if (!prompt.trim()) return
 
-    const newEntry: JournalEntry = {
-      type: 'command',
-      content: command
+    const userEntry: JournalEntry = {
+      type: 'prompt',
+      content: prompt,
+      timestamp: Date.now()
     }
 
-    let response = ''
+    setIsProcessing(true)
 
     try {
-      addEntry(newEntry)
+      addEntry(userEntry)
 
-      switch (command.toLowerCase().trim()) {
-        case 'help':
-          response = 'Commandes disponibles: help, clear, generate'
-          break;
-
-        case 'generate':
-          setIsGenerating(true)
-
-          const loadingEntry: JournalEntry = {
-            type: 'response',
-            content: 'Vous marchez ...'
-          }
-          addEntry(loadingEntry)
-
-          try {
-            const worldCell = await generateWorldCell()
-            response = `${worldCell.title} (${worldCell.rarity})\n${worldCell.description}\nCaractère sur la carte: ${worldCell.mapCharacter}`
-          } catch (error) {
-            console.error('❌ Error generating world cell:', error)
-            response = 'Erreur lors de la génération du lieu. Veuillez réessayer.'
-          } finally {
-            setIsGenerating(false)
-          }
-          break;
-
-        case 'clear':
-          addEntry(newEntry)
-          setCurrentInput("")
-          return
-
-        default:
-          response = `Commande "${command}" non reconnue`
+      const mockedWorldCell = {
+        id: "1",
+        title: "Le carrefour scintillant",
+        description: "Un ancien rond-point, sur lequel on a entassé des centaines de feux de signalisation.",
+        mapCharacter: ".",
       }
+
+      const context = {
+        user: user,
+        currentLocation: mockedWorldCell.title,
+        previousMessages: history.slice(-6).map(entry => entry.content)
+      }
+
+      const aiResponse = await processPrompt(prompt, context)
+
+      if (aiResponse.actions) {
+        for (const action of aiResponse.actions) {
+          await executeCommand(action, aiResponse.newWorldCell || undefined)
+        }
+      }
+
+      addEntry({
+        type: 'response',
+        content: aiResponse.narration,
+        timestamp: Date.now()
+      })
+
     } catch (error) {
-      console.error('❌ Error handling command:', error)
-      response = 'Une erreur est survenue.'
-    }
+      console.error('❌ Error processing prompt:', error)
 
-    const responseEntry: JournalEntry = {
-      type: 'response',
-      content: response
-    }
-
-    if (command.toLowerCase().trim() === 'generate') {
-      addEntry(responseEntry)
-    } else {
-      addEntry(responseEntry)
+      const errorEntry: JournalEntry = {
+        type: 'error',
+        content: 'Une erreur est survenue lors du traitement de votre demande.',
+        timestamp: Date.now()
+      }
+      addEntry(errorEntry)
+    } finally {
+      setIsProcessing(false)
     }
 
     setCurrentInput("")
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleCommand(currentInput)
+    if (e.key === 'Enter' && !isProcessing) {
+      handlePrompt(currentInput)
     }
   }
 
   return (
-    <div className="h-full flex flex-col grow w-full">
-      <main className="flex-1 font-[family-name:var(--font-geist-sans)] overflow-hidden w-full">
+    <div className="flex flex-col w-full h-full">
+      <div className="flex-1 overflow-hidden">
         <Journal history={history} />
-      </main>
+      </div>
 
-      <footer className="bg-background w-full flex flex-col gap-4 pb-4 px-4">
-        <Separator className="w-full" />
+      <div className="p-4 border-t">
+        <div className="flex items-center gap-2">
+          <Input
+            value={currentInput}
+            onChange={(e) => setCurrentInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Que faites-vous ?"
+            disabled={isProcessing}
+            className="flex-1"
+          />
 
-        <Input
-          value={currentInput}
-          onChange={(e) => setCurrentInput(e.target.value)}
-          onKeyDown={handleKeyPress}
-          placeholder={isGenerating ? "Génération en cours..." : "Que faites-vous ?"}
-          className="w-full font-[family-name:var(--font-syne-mono)]"
-          autoFocus
-          disabled={isGenerating}
-        />
-      </footer>
+          {isProcessing && (
+            <span className="text-muted-foreground animate-pulse">⚡</span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

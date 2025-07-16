@@ -1,11 +1,12 @@
 "use client"
 
-import { useRef, useEffect } from "react";
-import AsciiMap from "./Journal/AsciiMap";
+import { useRef, useEffect } from "react"
 
 export interface JournalEntry {
-  type: 'command' | 'response' | 'system'
+  type: 'prompt' | 'response' | 'system' | 'error'
   content: string
+  actions?: string[]
+  timestamp?: number
 }
 
 interface JournalProps {
@@ -32,31 +33,51 @@ export default function Journal({ history }: JournalProps) {
         {history.map((entry, index) => (
           <div key={index}>
 
-            {entry.type === 'command' ? (
+            {entry.type === 'prompt' ? (
               <blockquote className="italic border-l-4 border-primary pl-4">
-                <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
-                  {entry.content}
-                </pre>
+                <div className="flex items-center gap-2">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                    {entry.content}
+                  </pre>
+                </div>
               </blockquote>
 
             ) : entry.type === 'system' ? (
-              <div className="rounded p-2">
-                <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
-                  {entry.content}
-                </pre>
+              <div className="rounded p-2 bg-muted/50">
+                <div className="flex items-center gap-2">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                    {entry.content}
+                  </pre>
+                </div>
+              </div>
+
+            ) : entry.type === 'error' ? (
+              <div className="rounded p-2 bg-destructive/10 border border-destructive/20">
+                <div className="flex items-center gap-2">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-destructive">
+                    {entry.content}
+                  </pre>
+                </div>
               </div>
 
             ) : (
               <div>
-                <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
-                  {entry.content}
-                </pre>
+                <div className="flex items-center gap-2">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                    {entry.content}
+                  </pre>
+                </div>
               </div>
             )}
           </div>
         ))}
 
-        <AsciiMap />
+        {history.length === 0 && (
+          <div className="text-muted-foreground text-center p-8">
+            <p>Bienvenue dans votre aventure...</p>
+            <p className="text-sm mt-2">Commencez par vous présenter ou dites-moi ce que vous voulez faire!</p>
+          </div>
+        )}
       </div>
     </div>
   )

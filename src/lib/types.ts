@@ -9,4 +9,8 @@ export interface WorldCellWithUsers extends WorldCell {
     name: string
     email: string
   }>
-} 
+}
+
+export type ExtendedUser = User & {
+  worldCell?: WorldCell
+}
