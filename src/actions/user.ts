@@ -75,7 +75,7 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
 
       } catch (aiError) {
         console.error('⚠️ AI generation failed, trying retry then fallback to predefined:', aiError)
-        
+
         try {
           // One retry attempt
           const retryData = await generateWorldCell()
@@ -83,8 +83,9 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
             data: { x, y, ...retryData }
           })
           console.log(`🔄 Retry successful: ${retryData.title}`)
-          
+
         } catch (retryError) {
+          console.error('⚠️ Retry failed, using predefined starter location:', retryError)
           // Use predefined starter location
           const starterLocation = STARTER_LOCATIONS[Math.floor(Math.random() * STARTER_LOCATIONS.length)]
 

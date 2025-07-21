@@ -1,6 +1,5 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
-import { useUserStore } from "./userStore"
 
 export interface JournalEntry {
   type: 'prompt' | 'response' | 'system' | 'error'
