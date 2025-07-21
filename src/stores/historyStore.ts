@@ -35,7 +35,7 @@ const initialHistory: JournalEntry[] = [
 
 export const useHistoryStore = create<HistoryState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       history: [],
       addEntry: (entry) => set((state) => ({ history: [...state.history, entry] })),
     }),
