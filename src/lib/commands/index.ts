@@ -32,6 +32,7 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
       console.error('❌ Error generating world cell:', error)
     }
   }
+
   if (action === 'move_south') {
     try {
       if (!user?.worldCell) {

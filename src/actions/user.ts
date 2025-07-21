@@ -9,7 +9,11 @@ export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<Extended
   const user = await prisma.user.findUnique({
     where: id,
     include: {
-      worldCell: true,
+      worldCell: {
+        include: {
+          users: true
+        }
+      }
     },
   })
 
@@ -21,7 +25,11 @@ export async function updateUser(id: Prisma.UserWhereUniqueInput, data: Prisma.U
     where: id,
     data,
     include: {
-      worldCell: true,
+      worldCell: {
+        include: {
+          users: true
+        }
+      }
     },
   })
 

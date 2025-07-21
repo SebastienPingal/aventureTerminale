@@ -11,6 +11,10 @@ export interface WorldCellWithUsers extends WorldCell {
   }>
 }
 
+export interface ExtendedWorldCell extends WorldCell {
+  users?: Array<User>
+}
+
 export type ExtendedUser = User & {
-  worldCell?: WorldCell
+  worldCell?: ExtendedWorldCell
 }
