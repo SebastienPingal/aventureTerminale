@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider"
 import { AuthSessionProvider } from "@/components/SessionProvider"
 import { Separator } from "@/components/ui/separator"
 import { ToggleTheme } from "@/components/ToggleTheme"
-import { auth } from "@/auth"
+import { auth, signOut } from "@/auth"
 
 const rubikDirt = Rubik_Dirt({
   variable: "--font-rubik-dirt",
@@ -30,6 +30,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const session = await auth()
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -49,7 +50,22 @@ export default async function RootLayout({
                 </h1>
 
                 <div className="flex items-center gap-2">
-                  {session && <p>{session.user?.name}</p>}
+                  {session && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <p>{session.user?.name}</p>
+                      <form action={async () => {
+                        "use server"
+                        await signOut()
+                      }}>
+                        <button
+                          type="submit"
+                          className="text-sm underline cursor-pointer"
+                        >
+                          Logout
+                        </button>
+                      </form>
+                    </div>
+                  )}
                   <ToggleTheme />
                 </div>
               </div>
