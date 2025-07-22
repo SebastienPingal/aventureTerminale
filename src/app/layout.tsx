@@ -20,8 +20,8 @@ const syneMono = Syne_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Aventure Terminale",
-  description: "Aventure Terminale",
+  title: "Un Désert",
+  description: "Un jeu de rôle en ligne multijoueur sur navigateur",
 }
 
 export default async function RootLayout({
