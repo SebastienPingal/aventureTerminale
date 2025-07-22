@@ -1,8 +1,6 @@
-import { WorldCell } from "@/app/generated/prisma"
 import { useUserStore } from "@/stores/userStore"
 import { useWorldCellStore } from "@/stores/worldCellStore"
 import { PromptResponse } from "@/actions/promptProcessor"
-import { createAndAddObjectToInventory } from "@/actions/object"
 
 export async function executeCommand(aiResponse: PromptResponse): Promise<void> {
   const userStore = useUserStore.getState()
