@@ -32,38 +32,34 @@ export default function Journal({ history }: JournalProps) {
       <div className="flex flex-col gap-2 p-4">
         {history.map((entry, index) => (
           <div key={index}>
-
             {entry.type === 'prompt' ? (
               <blockquote className="italic border-l-4 border-primary pl-4">
                 <div className="flex items-center gap-2">
-                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
                     {entry.content}
                   </pre>
                 </div>
               </blockquote>
-
             ) : entry.type === 'system' ? (
               <div className="rounded p-2 bg-muted/50">
                 <div className="flex items-center gap-2">
-                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
                     {entry.content}
                   </pre>
                 </div>
               </div>
-
             ) : entry.type === 'error' ? (
               <div className="rounded p-2 bg-destructive/10 border border-destructive/20">
                 <div className="flex items-center gap-2">
-                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-destructive">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-destructive text-justify">
                     {entry.content}
                   </pre>
                 </div>
               </div>
-
             ) : (
               <div>
                 <div className="flex items-center gap-2">
-                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)]">
+                  <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
                     {entry.content}
                   </pre>
                 </div>
