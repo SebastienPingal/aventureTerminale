@@ -1,14 +1,15 @@
 import { WorldCell } from "@/app/generated/prisma"
 import { useUserStore } from "@/stores/userStore"
 import { useWorldCellStore } from "@/stores/worldCellStore"
+import { PromptResponse } from "@/actions/promptProcessor"
+import { createAndAddObjectToInventory } from "@/actions/object"
 
-export async function executeCommand(action: string, worldCell?: Partial<WorldCell>): Promise<void> {
+export async function executeCommand(aiResponse: PromptResponse): Promise<void> {
   const userStore = useUserStore.getState()
   const worldCellStore = useWorldCellStore.getState()
-  const { user } = userStore
-  const { moveUser } = userStore
+  const { user, moveUser, addObjectToInventory } = userStore
 
-  if (action === 'move_north') {
+  if (aiResponse.actions?.includes('move_north')) {
     try {
       if (!user?.worldCell) {
         throw new Error('User has no world cell')
@@ -20,9 +21,9 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
       await worldCellStore.createNewWorldCell(
         user.worldCell.x,
         newY,
-        worldCell?.mapCharacter || ".",
-        worldCell?.title || "Unknown",
-        worldCell?.description || "A mysterious place"
+        aiResponse.newWorldCell?.mapCharacter || ".",
+        aiResponse.newWorldCell?.title || "Unknown",
+        aiResponse.newWorldCell?.description || "A mysterious place"
       )
 
       await moveUser('north')
@@ -31,9 +32,8 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
     } catch (error) {
       console.error('❌ Error generating world cell:', error)
     }
-  }
 
-  if (action === 'move_south') {
+  } else if (aiResponse.actions?.includes('move_south')) {
     try {
       if (!user?.worldCell) {
         throw new Error('User has no world cell')
@@ -43,9 +43,9 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
       await worldCellStore.createNewWorldCell(
         user.worldCell.x,
         newY,
-        worldCell?.mapCharacter || ".",
-        worldCell?.title || "Unknown",
-        worldCell?.description || "A mysterious place"
+        aiResponse.newWorldCell?.mapCharacter || ".",
+        aiResponse.newWorldCell?.title || "Unknown",
+        aiResponse.newWorldCell?.description || "A mysterious place"
       )
 
       await moveUser('south')
@@ -54,9 +54,8 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
     } catch (error) {
       console.error('❌ Error generating world cell:', error)
     }
-  }
 
-  if (action === 'move_east') {
+  } else if (aiResponse.actions?.includes('move_east')) {
     try {
       if (!user?.worldCell) {
         throw new Error('User has no world cell')
@@ -66,9 +65,9 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
       await worldCellStore.createNewWorldCell(
         newX,
         user.worldCell.y,
-        worldCell?.mapCharacter || ".",
-        worldCell?.title || "Unknown",
-        worldCell?.description || "A mysterious place"
+        aiResponse.newWorldCell?.mapCharacter || ".",
+        aiResponse.newWorldCell?.title || "Unknown",
+        aiResponse.newWorldCell?.description || "A mysterious place"
       )
 
       await moveUser('east')
@@ -77,9 +76,7 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
     } catch (error) {
       console.error('❌ Error generating world cell:', error)
     }
-  }
-
-  if (action === 'move_west') {
+  } else if (aiResponse.actions?.includes('move_west')) {
     try {
       if (!user?.worldCell) {
         throw new Error('User has no world cell')
@@ -89,9 +86,9 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
       await worldCellStore.createNewWorldCell(
         newX,
         user.worldCell.y,
-        worldCell?.mapCharacter || ".",
-        worldCell?.title || "Unknown",
-        worldCell?.description || "A mysterious place"
+        aiResponse.newWorldCell?.mapCharacter || ".",
+        aiResponse.newWorldCell?.title || "Unknown",
+        aiResponse.newWorldCell?.description || "A mysterious place"
       )
 
       await moveUser('west')
@@ -101,4 +98,16 @@ export async function executeCommand(action: string, worldCell?: Partial<WorldCe
       console.error('❌ Error generating world cell:', error)
     }
   }
-} 
+
+  // ✅ IMPROVED: Properly add objects to inventory
+  if (aiResponse.newObject) {
+    console.log('🎒 Processing new object from AI:', aiResponse.newObject)
+
+    await addObjectToInventory({
+      name: aiResponse.newObject.name || "",
+      description: aiResponse.newObject.description || ""
+    })
+
+    console.log('✅ Loot successfully added to inventory via proper workflow')
+  }
+}

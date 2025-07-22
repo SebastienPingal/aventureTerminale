@@ -29,7 +29,7 @@ const initialHistory: JournalEntry[] = [
   },
   {
     type: 'response',
-    content: 'Vous pouvez explorer le monde en tapant "look" ou "move [direction]".'
+    content: 'Vous vous réveillez dans un monde désolé, sans vie. Vous ne savez pas qui vous êtes, ni comment vous êtes arrivé ici.'
   }
 ]
 

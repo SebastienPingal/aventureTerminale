@@ -12,7 +12,7 @@ export default function Home() {
   const { history, addEntry } = useHistoryStore()
   const [currentInput, setCurrentInput] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
-  const { user } = useUserStore()
+  const { user, userWorldCell, surroundingCells, inventory } = useUserStore()
 
   const handlePrompt = async (prompt: string) => {
     if (!prompt.trim()) return
@@ -28,26 +28,18 @@ export default function Home() {
     try {
       addEntry(userEntry)
 
-      const mockedWorldCell = {
-        id: "1",
-        title: "Le carrefour scintillant",
-        description: "Un ancien rond-point, sur lequel on a entassé des centaines de feux de signalisation.",
-        mapCharacter: ".",
-      }
-
       const context = {
         user: user,
-        currentLocation: mockedWorldCell.title,
-        previousMessages: history.slice(-6).map(entry => entry.content)
+        currentLocation: userWorldCell?.title,
+        previousMessages: history.slice(-6).map(entry => entry.content),
+        playerInventory: inventory,
+        currentCell: userWorldCell || undefined,
+        surroundingCells: surroundingCells
       }
 
       const aiResponse = await processPrompt(prompt, context)
 
-      if (aiResponse.actions) {
-        for (const action of aiResponse.actions) {
-          await executeCommand(action, aiResponse.newWorldCell || undefined)
-        }
-      }
+      await executeCommand(aiResponse)
 
       addEntry({
         type: 'response',
@@ -64,6 +56,7 @@ export default function Home() {
         timestamp: Date.now()
       }
       addEntry(errorEntry)
+
     } finally {
       setIsProcessing(false)
     }

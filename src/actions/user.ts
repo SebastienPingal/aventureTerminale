@@ -16,7 +16,8 @@ export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<Extended
         include: {
           users: true
         }
-      }
+      },
+      inventory: true
     },
   })
 
@@ -32,7 +33,8 @@ export async function updateUser(id: Prisma.UserWhereUniqueInput, data: Prisma.U
         include: {
           users: true
         }
-      }
+      },
+      inventory: true
     },
   })
 
@@ -95,6 +97,7 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
           console.log(`🎯 Used predefined starter: ${starterLocation.title}`)
         }
       }
+
     } else {
       console.log(`📍 Using existing world cell at (${x}, ${y}): ${worldCell.title}`)
     }
@@ -108,7 +111,8 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
           include: {
             users: true
           }
-        }
+        },
+        inventory: true
       }
     })
 
@@ -127,12 +131,11 @@ export async function getMe(): Promise<ExtendedUser | null> {
     return null
   }
 
-  let me = await getUser({ id: session.user.id })
+  const me = await getUser({ id: session.user.id })
 
-  // 🎯 If user doesn't have a world cell, initialize them with a random position
   if (me && !me.worldCell) {
-    console.log("🆕 New user detected, initializing random position...")
-    me = await initializeUserPosition(me.id)
+    console.log("⚠️ User without position detected, initializing fallback position...")
+    return await initializeUserPosition(me.id)
   }
 
   return me

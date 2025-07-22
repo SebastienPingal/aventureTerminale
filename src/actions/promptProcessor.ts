@@ -3,7 +3,7 @@
 import { GENERATION_CONFIG } from "@/lib/constants/ai"
 import Together from "together-ai"
 import { RARITY_EXPLANATIONS } from "@/lib/constants/world"
-import { WorldCell } from "@/lib/types"
+import { Loot, WorldCell } from "@/lib/types"
 import { randomRarity } from "@/lib/helper"
 
 const together = new Together()
@@ -12,6 +12,7 @@ export interface PromptResponse {
   narration: string
   actions?: string[]
   newWorldCell?: Partial<WorldCell>
+  newObject?: Loot
 }
 
 export async function processPrompt(
@@ -23,6 +24,7 @@ export async function processPrompt(
       x: number
       y: number
     }
+    playerInventory?: Loot[]
     currentCell?: WorldCell
     surroundingCells?: {
       north?: WorldCell
@@ -50,14 +52,15 @@ CONTEXTE ACTUEL:
   Est: ${context?.surroundingCells?.east?.title || 'Inconnu'} - ${context?.surroundingCells?.east?.description || 'Inconnu'}
   Ouest: ${context?.surroundingCells?.west?.title || 'Inconnu'} - ${context?.surroundingCells?.west?.description || 'Inconnu'}
 
-La rareté est la suivante :
-${rarityExplanation}
-
 INSTRUCTIONS:
 1. Analyse l'action du joueur
 2. Si mouvement vers cellule inexistante, génère-la avec rareté appropriée
-3. Fournis une narration complète et immersive
-4. Considère l'influence des cellules environnantes sur la génération
+3. Si le joueur récupère un objet, crée-le
+4. Fournis une narration complète et immersive
+5. Considère l'influence des cellules environnantes sur la génération
+
+La rareté est la suivante :
+${rarityExplanation}
 
 Réponds TOUJOURS en JSON avec cette structure:
 {
@@ -67,6 +70,10 @@ Réponds TOUJOURS en JSON avec cette structure:
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
     "mapCharacter": "single ASCII char",
   } | null, // null si le joueur ne bouge pas ou se déplace dans une cellule existante
+  "newObject": {
+    "name": "string",
+    "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
+  } | null, // null si le joueur ne récupère pas d'objet
   "narration": "Réponse immersive complète au joueur en te basant sur le contexte actuel et l'input du joueur"
 }
 
