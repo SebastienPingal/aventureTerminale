@@ -18,11 +18,30 @@ model User {
   session       Session[]
   inventory     Loot[]
   Authenticator Authenticator[]
+  journal       JournalEntry[]
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   worldCell   WorldCell? @relation(fields: [worldCellId], references: [id])
   worldCellId String?
+}
+
+enum JournalEntryType {
+  PROMPT
+  RESPONSE
+  SYSTEM
+  ERROR
+}
+
+model JournalEntry {
+  id      String      @id @default(uuid())
+  content String
+  type    JournalEntryType @default(SYSTEM)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Loot {

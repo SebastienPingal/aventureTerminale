@@ -5,6 +5,7 @@ import { Prisma } from "@/app/generated/prisma"
 import { ExtendedUser, Loot, WorldCell } from "@/lib/types"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { create } from "zustand"
+import { useJournalStore } from "./journalEntryStore"
 
 interface UserState {
   user: ExtendedUser | null
@@ -79,21 +80,38 @@ export const useUserStore = create<UserState>()(
       },
 
       getMe: async () => {
-        const user = await getMe()
-        set({ user })
+        try {
+          set({ loading: true, error: null })
+          console.log("🔄 Fetching user data...")
+          
+          const user = await getMe()
+          set({ user })
 
-        if (!user) return
+          if (!user) return
 
-        if (user?.worldCell) {
-          await get().updateSurroundingCells()
-        }
+          // TODO checkfirst if it is needed to update the surrounding cells
+          if (user?.worldCell) {
+            await get().updateSurroundingCells()
+            set({ userWorldCell: user?.worldCell })
+            set({ inventory: user?.inventory || [] })
 
-        if (!user?.worldCell) {
-          await initializeUserPosition(user.id)
+            useJournalStore.getState().refreshJournal(user.id)
+          }
+
+          if (!user?.worldCell) {
+            await initializeUserPosition(user.id)
+            await useJournalStore.getState().refreshJournal(user.id)
+          }
+          
+          console.log("✅ User data fetched successfully")
+        } catch (error) {
+          console.error("❌ Error fetching user data:", error)
+          set({ error: error as string })
+        } finally {
+          set({ loading: false })
         }
       },
 
-      // 🆕 Fonction pour récupérer les cellules environnantes
       updateSurroundingCells: async () => {
         const { user } = get()
 

@@ -12,6 +12,7 @@ export async function generateWorldCell(): Promise<{
   description: string
   mapCharacter: string
   rarity: string
+  narration: string
 }> {
   const rarity = randomRarity()
   console.log('🚜 rarity', rarity)
@@ -50,7 +51,8 @@ export async function generateWorldCell(): Promise<{
   {
     "title": "Nom unique et évocateur du lieu",
     "description": "Description immersive en ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots maximum",
-    "mapCharacter": "caractère ASCII qui ressemble au lieu. PAS D'ÉMOJIS !!"
+    "mapCharacter": "caractère ASCII qui ressemble au lieu. PAS D'ÉMOJIS !!",
+    "narration": "Narration immersive de lieu, en parlant au joueur et lui expliquant ou il se trouve."
   }
   `
 
@@ -79,5 +81,6 @@ export async function generateWorldCell(): Promise<{
     description: parsedJson.description,
     mapCharacter: parsedJson.mapCharacter,
     rarity: rarity,
+    narration: parsedJson.narration
   }
 }

@@ -1,26 +1,19 @@
-"use client"
-
 import { useRef, useEffect } from "react"
-
-export interface JournalEntry {
-  type: 'prompt' | 'response' | 'system' | 'error'
-  content: string
-  actions?: string[]
-  timestamp?: number
-}
+import { JournalEntryType } from "@/app/generated/prisma"
+import { JournalEntry } from "@/lib/types"
 
 interface JournalProps {
-  history: JournalEntry[]
+  journal: JournalEntry[]
 }
 
-export default function Journal({ history }: JournalProps) {
+export default function Journal({ journal }: JournalProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [history])
+  }, [journal])
 
   return (
     <div
@@ -30,9 +23,9 @@ export default function Journal({ history }: JournalProps) {
       <div className="flex-1" />
 
       <div className="flex flex-col gap-2 p-4">
-        {history.map((entry, index) => (
+        {journal.map((entry, index) => (
           <div key={index}>
-            {entry.type === 'prompt' ? (
+            {entry.type === JournalEntryType.PROMPT ? (
               <blockquote className="italic border-l-4 border-primary pl-4">
                 <div className="flex items-center gap-2">
                   <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
@@ -40,7 +33,7 @@ export default function Journal({ history }: JournalProps) {
                   </pre>
                 </div>
               </blockquote>
-            ) : entry.type === 'system' ? (
+            ) : entry.type === JournalEntryType.SYSTEM ? (
               <div className="rounded p-2 bg-muted/50">
                 <div className="flex items-center gap-2">
                   <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
@@ -48,7 +41,7 @@ export default function Journal({ history }: JournalProps) {
                   </pre>
                 </div>
               </div>
-            ) : entry.type === 'error' ? (
+            ) : entry.type === JournalEntryType.ERROR ? (
               <div className="rounded p-2 bg-destructive/10 border border-destructive/20">
                 <div className="flex items-center gap-2">
                   <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-destructive text-justify">
@@ -68,7 +61,7 @@ export default function Journal({ history }: JournalProps) {
           </div>
         ))}
 
-        {history.length === 0 && (
+        {journal.length === 0 && (
           <div className="text-muted-foreground text-center p-8">
             <p>Bienvenue dans votre aventure...</p>
             <p className="text-sm mt-2">Commencez par vous présenter ou dites-moi ce que vous voulez faire!</p>

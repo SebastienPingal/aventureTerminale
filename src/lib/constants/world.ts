@@ -1,5 +1,18 @@
 // 🌍 World Configuration Constants
 
+export const ASCII_ART = `
+        :::    ::: ::::    :::      :::::::::  :::::::::: ::::::::  :::::::::: ::::::::: ::::::::::: 
+        :+:    :+: :+:+:   :+:      :+:    :+: :+:       :+:    :+: :+:        :+:    :+:    :+:     
+        +:+    +:+ :+:+:+  +:+      +:+    +:+ +:+       +:+        +:+        +:+    +:+    +:+     
+        +#+    +:+ +#+ +:+ +#+      +#+    +:+ +#++:++#  +#++:++#++ +#++:++#   +#++:++#:     +#+     
+        +#+    +#+ +#+  +#+#+#      +#+    +#+ +#+              +#+ +#+        +#+    +#+    +#+     
+        #+#    #+# #+#   #+#+#      #+#    #+# #+#       #+#    #+# #+#        #+#    #+#    #+#     
+         ########  ###    ####      #########  ########## ########  ########## ###    ###    ###     
+  
+`
+
+export const INTRO_TEXT = 'Vous vous réveillez dans un lieu inconnu, vous ne vous souvenez de rien. Autour de vous, tout est calme et désolé.'
+
 // 🎲 Rarity system for world cell generation
 export const RARITY_WEIGHTS = {
   "commun": 80,

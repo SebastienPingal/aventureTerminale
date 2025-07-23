@@ -6,7 +6,10 @@ import { ExtendedUser } from "@/lib/types"
 import { auth } from "@/auth"
 import { generateRandomPosition } from "@/lib/helper"
 import { generateWorldCell } from "./generation"
-import { STARTER_LOCATIONS } from "@/lib/constants/world"
+import { ASCII_ART, INTRO_TEXT, STARTER_LOCATIONS } from "@/lib/constants/world"
+import { createJournalEntry } from "./journalEntry"
+import { JournalEntryType } from "@/app/generated/prisma"
+import { createWorldCell } from "./worldCell"
 
 export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<ExtendedUser | null> {
   const user = await prisma.user.findUnique({
@@ -17,7 +20,8 @@ export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<Extended
           users: true
         }
       },
-      inventory: true
+      inventory: true,
+      journal: true
     },
   })
 
@@ -34,7 +38,8 @@ export async function updateUser(id: Prisma.UserWhereUniqueInput, data: Prisma.U
           users: true
         }
       },
-      inventory: true
+      inventory: true,
+      journal: true
     },
   })
 
@@ -43,11 +48,18 @@ export async function updateUser(id: Prisma.UserWhereUniqueInput, data: Prisma.U
 
 /**
  * 🎯 Initializes a user with a random starting position using existing AI generation
+ * it also create a new journal entry for the user
+ * @param userId - The ID of the user to initialize
+ * @returns The updated user with the new position
  */
 export async function initializeUserPosition(userId: string): Promise<ExtendedUser | null> {
   console.log(`🎲 Initializing random position for user: ${userId}`)
 
   try {
+    // Create ASCII art and intro text
+    await createJournalEntry(userId, ASCII_ART, JournalEntryType.SYSTEM)
+    await createJournalEntry(userId, INTRO_TEXT, JournalEntryType.SYSTEM)
+
     // Generate random position
     const { x, y } = generateRandomPosition()
 
@@ -56,22 +68,16 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
       where: { x_y: { x, y } }
     })
 
+
     // If no cell exists, create one using the existing AI generation
     if (!worldCell) {
       try {
         console.log(`🤖 Generating world cell at (${x}, ${y}) using existing AI system...`)
         const generatedData = await generateWorldCell()
 
-        worldCell = await prisma.worldCell.create({
-          data: {
-            x,
-            y,
-            title: generatedData.title,
-            description: generatedData.description,
-            mapCharacter: generatedData.mapCharacter,
-            rarity: generatedData.rarity
-          }
-        })
+        worldCell = await createWorldCell(x, y, generatedData.mapCharacter, generatedData.title, generatedData.description)
+
+        await createJournalEntry(userId, generatedData.narration, JournalEntryType.SYSTEM)
 
         console.log(`✨ Created AI-generated world cell: ${generatedData.title} (${generatedData.rarity})`)
 
@@ -81,9 +87,11 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
         try {
           // One retry attempt
           const retryData = await generateWorldCell()
-          worldCell = await prisma.worldCell.create({
-            data: { x, y, ...retryData }
-          })
+
+          worldCell = await createWorldCell(x, y, retryData.mapCharacter, retryData.title, retryData.description)
+
+          await createJournalEntry(userId, retryData.narration, JournalEntryType.SYSTEM)
+
           console.log(`🔄 Retry successful: ${retryData.title}`)
 
         } catch (retryError) {
@@ -91,9 +99,10 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
           // Use predefined starter location
           const starterLocation = STARTER_LOCATIONS[Math.floor(Math.random() * STARTER_LOCATIONS.length)]
 
-          worldCell = await prisma.worldCell.create({
-            data: { x, y, ...starterLocation }
-          })
+          worldCell = await createWorldCell(x, y, starterLocation.mapCharacter, starterLocation.title, starterLocation.description)
+
+          await createJournalEntry(userId, starterLocation.description, JournalEntryType.SYSTEM)
+
           console.log(`🎯 Used predefined starter: ${starterLocation.title}`)
         }
       }
@@ -112,7 +121,8 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
             users: true
           }
         },
-        inventory: true
+        inventory: true,
+        journal: true
       }
     })
 
