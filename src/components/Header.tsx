@@ -1,7 +1,6 @@
 import { Separator } from "@/components/ui/separator"
 import { ToggleTheme } from "./ToggleTheme"
-import { auth } from "@/auth"
-import { signOut } from "next-auth/react"
+import { auth, signOut } from "@/auth"
 import { getMe } from "@/actions/user"
 
 export default async function Header() {
@@ -24,6 +23,7 @@ export default async function Header() {
               <p>{session.user?.name}</p>
               <form action={async () => {
                 "use server"
+
                 await signOut()
               }}>
                 <button

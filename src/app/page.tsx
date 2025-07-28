@@ -5,14 +5,14 @@ import Journal from "@/components/Journal"
 import { useState } from "react"
 import { processPrompt } from "../actions/promptProcessor"
 import { executeCommand } from "@/lib/commands"
-import { useUserStore } from "@/stores/userStore"
+import { useUser } from "@/contexts/UserContext"
+import { useJournal } from "@/contexts/JournalContext"
 import { JournalEntryType } from "@/app/generated/prisma"
 import { createJournalEntry } from "@/actions/journalEntry"
-import { useJournalStore } from "@/stores/journalEntryStore"
 
 export default function Home() {
-  const { journal, refreshJournal } = useJournalStore()
-  const { user, userWorldCell, surroundingCells, inventory } = useUserStore()
+  const { journal, refreshJournal } = useJournal()
+  const { user, userWorldCell, surroundingCells, inventory } = useUser()
   const [currentInput, setCurrentInput] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
 

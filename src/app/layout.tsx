@@ -3,6 +3,10 @@ import { Syne_Mono, Rubik_Dirt } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import { AuthSessionProvider } from "@/components/SessionProvider"
+import { UserSessionManager } from "@/components/UserSessionManager"
+import { JournalProvider } from "@/contexts/JournalContext"
+import { UserProvider } from "@/contexts/UserContext"
+import { WorldCellProvider } from "@/contexts/WorldCellContext"
 import Header from "@/components/Header"
 
 const rubikDirt = Rubik_Dirt({
@@ -33,18 +37,26 @@ export default async function RootLayout({
       <body
         className={`${rubikDirt.variable} ${syneMono.variable} antialiased h-screen overflow-hidden relative flex flex-col font-[family-name:var(--font-syne-mono)]`}
       >
-        <AuthSessionProvider >
+        <AuthSessionProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
+            <JournalProvider>
+              <UserProvider>
+                <WorldCellProvider>
+                  <UserSessionManager>
+                    <Header />
 
-            <div className="flex flex-col items-center max-w-6xl mx-auto flex-1 overflow-y-auto w-full">
-              {children}
-            </div>
+                    <div className="flex flex-col items-center max-w-6xl mx-auto flex-1 overflow-y-auto w-full">
+                      {children}
+                    </div>
+                  </UserSessionManager>
+                </WorldCellProvider>
+              </UserProvider>
+            </JournalProvider>
           </ThemeProvider>
         </AuthSessionProvider>
       </body>
