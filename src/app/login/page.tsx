@@ -4,9 +4,9 @@ import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { FaGoogle, FaDiscord, FaGithub } from "react-icons/fa"
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 
-export default function Login() {
+function LoginContent() {
   const searchParams = useSearchParams()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -109,5 +109,13 @@ export default function Login() {
         Se connecter avec GitHub
       </Button>
     </div>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="flex justify-center mt-20">🔄 Chargement...</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }
