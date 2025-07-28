@@ -41,7 +41,7 @@ interface UserContextType extends UserState {
   addObjectToInventory: (objectData: { name: string; description: string }) => Promise<void>
 }
 
-type UserAction = 
+type UserAction =
   | { type: 'SET_USER'; payload: ExtendedUser | null }
   | { type: 'SET_USER_WORLD_CELL'; payload: WorldCell }
   | { type: 'SET_SURROUNDING_CELLS'; payload: { north?: WorldCell; south?: WorldCell; east?: WorldCell; west?: WorldCell } }
@@ -75,7 +75,7 @@ const USER_STORAGE_KEY = 'user-storage'
 
 const loadFromStorage = (): Partial<UserState> => {
   if (typeof window === 'undefined') return {}
-  
+
   try {
     const stored = localStorage.getItem(USER_STORAGE_KEY)
     if (stored) {
@@ -90,7 +90,7 @@ const loadFromStorage = (): Partial<UserState> => {
 
 const saveToStorage = (state: UserState) => {
   if (typeof window === 'undefined') return
-  
+
   try {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify({
       state,
@@ -124,7 +124,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             if (value) dispatch({ type: 'SET_USER_WORLD_CELL', payload: value as WorldCell })
             break
           case 'surroundingCells':
-            dispatch({ type: 'SET_SURROUNDING_CELLS', payload: value as any })
+            dispatch({ type: 'SET_SURROUNDING_CELLS', payload: value as { north?: WorldCell; south?: WorldCell; east?: WorldCell; west?: WorldCell } })
             break
           case 'inventory':
             dispatch({ type: 'SET_INVENTORY', payload: value as Loot[] })
@@ -285,7 +285,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_LOADING', payload: true })
       dispatch({ type: 'SET_ERROR', payload: null })
       console.log('🔄 Fetching user data...')
-      
+
       const user = await getMe()
       dispatch({ type: 'SET_USER', payload: user })
 
@@ -332,7 +332,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (!user?.worldCell) {
         await initializeUserPosition(user.id)
       }
-      
+
       console.log('✅ User data fetched successfully')
     } catch (error) {
       console.error('❌ Error fetching user data:', error)
