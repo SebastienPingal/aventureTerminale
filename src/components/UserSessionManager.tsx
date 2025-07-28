@@ -11,7 +11,7 @@ interface UserSessionManagerProps {
 
 export function UserSessionManager({ children }: UserSessionManagerProps) {
   const { data: session, status } = useSession()
-  const { getMe, user, setUser, loading } = useUser()
+  const { getMe, user, setUser } = useUser()
   const { refreshJournal } = useJournal()
   const lastSessionId = useRef<string | null>(null)
   const isInitialized = useRef(false)
