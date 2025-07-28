@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react'
+import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react'
 import { WorldCell } from '@/lib/types'
 import { fetchWorldCells, fetchWorldCellsInArea, createWorldCell } from '@/actions/worldCell'
 
@@ -61,27 +61,27 @@ export function WorldCellProvider({ children }: { children: ReactNode }) {
     error: null
   })
 
-  const setWorldCells = (cells: WorldCell[]) => {
+  const setWorldCells = useCallback((cells: WorldCell[]) => {
     dispatch({ type: 'SET_WORLD_CELLS', payload: cells })
-  }
+  }, [])
 
-  const setLoading = (loading: boolean) => {
+  const setLoading = useCallback((loading: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: loading })
-  }
+  }, [])
 
-  const setError = (error: string | null) => {
+  const setError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_ERROR', payload: error })
-  }
+  }, [])
 
-  const updateWorldCell = (cell: WorldCell) => {
+  const updateWorldCell = useCallback((cell: WorldCell) => {
     dispatch({ type: 'UPDATE_WORLD_CELL', payload: cell })
-  }
+  }, [])
 
-  const getWorldCellAt = (x: number, y: number) => {
+  const getWorldCellAt = useCallback((x: number, y: number) => {
     return state.worldCells.find(cell => cell.x === x && cell.y === y)
-  }
+  }, [state.worldCells])
 
-  const loadWorldCells = async () => {
+  const loadWorldCells = useCallback(async () => {
     if (state.worldCells.length > 0) return // Don't reload if already loaded
     
     dispatch({ type: 'SET_LOADING', payload: true })
@@ -98,9 +98,9 @@ export function WorldCellProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
     }
-  }
+  }, [state.worldCells.length])
 
-  const loadWorldCellsInArea = async (minX: number, maxX: number, minY: number, maxY: number) => {
+  const loadWorldCellsInArea = useCallback(async (minX: number, maxX: number, minY: number, maxY: number) => {
     dispatch({ type: 'SET_LOADING', payload: true })
     dispatch({ type: 'SET_ERROR', payload: null })
     
@@ -115,9 +115,9 @@ export function WorldCellProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
     }
-  }
+  }, [])
 
-  const createNewWorldCell = async (x: number, y: number, mapCharacter: string, title: string, description: string) => {
+  const createNewWorldCell = useCallback(async (x: number, y: number, mapCharacter: string, title: string, description: string) => {
     dispatch({ type: 'SET_LOADING', payload: true })
     dispatch({ type: 'SET_ERROR', payload: null })
     
@@ -136,11 +136,11 @@ export function WorldCellProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
     }
-  }
+  }, [])
 
-  const reset = () => {
+  const reset = useCallback(() => {
     dispatch({ type: 'RESET' })
-  }
+  }, [])
 
   const value: WorldCellContextType = {
     ...state,

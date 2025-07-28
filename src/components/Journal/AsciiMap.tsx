@@ -1,6 +1,6 @@
 "use client"
 
-import { useWorldCellStore } from '@/stores/worldCellStore'
+import { useWorldCell } from '@/contexts/WorldCellContext'
 import { useEffect } from 'react'
 
 export default function AsciiMap() {
@@ -10,7 +10,7 @@ export default function AsciiMap() {
     error,
     getWorldCellAt,
     loadWorldCells
-  } = useWorldCellStore()
+  } = useWorldCell()
 
   useEffect(() => {
     loadWorldCells()

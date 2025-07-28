@@ -1,11 +1,12 @@
-import { useUserStore } from "@/stores/userStore"
-import { useWorldCellStore } from "@/stores/worldCellStore"
 import { PromptResponse } from "@/actions/promptProcessor"
+import { useUser } from "@/contexts/UserContext"
+import { useWorldCell } from "@/contexts/WorldCellContext"
 
-export async function executeCommand(aiResponse: PromptResponse): Promise<void> {
-  const userStore = useUserStore.getState()
-  const worldCellStore = useWorldCellStore.getState()
-  const { user, moveUser, addObjectToInventory } = userStore
+export async function executeCommand(
+  aiResponse: PromptResponse,
+): Promise<void> {
+  const { user, moveUser, addObjectToInventory } = useUser()
+  const { createNewWorldCell } = useWorldCell()
 
   if (aiResponse.actions?.includes('move_north')) {
     try {
@@ -15,8 +16,8 @@ export async function executeCommand(aiResponse: PromptResponse): Promise<void> 
 
       const newY = user.worldCell.y + 1
 
-      // Use the store's createNewWorldCell method
-      await worldCellStore.createNewWorldCell(
+      // Use the createNewWorldCell method
+      await createNewWorldCell(
         user.worldCell.x,
         newY,
         aiResponse.newWorldCell?.mapCharacter || ".",
@@ -38,7 +39,7 @@ export async function executeCommand(aiResponse: PromptResponse): Promise<void> 
       }
 
       const newY = user.worldCell.y - 1
-      await worldCellStore.createNewWorldCell(
+      await createNewWorldCell(
         user.worldCell.x,
         newY,
         aiResponse.newWorldCell?.mapCharacter || ".",
@@ -60,7 +61,7 @@ export async function executeCommand(aiResponse: PromptResponse): Promise<void> 
       }
 
       const newX = user.worldCell.x + 1
-      await worldCellStore.createNewWorldCell(
+      await createNewWorldCell(
         newX,
         user.worldCell.y,
         aiResponse.newWorldCell?.mapCharacter || ".",
@@ -81,7 +82,7 @@ export async function executeCommand(aiResponse: PromptResponse): Promise<void> 
       }
 
       const newX = user.worldCell.x - 1
-      await worldCellStore.createNewWorldCell(
+      await createNewWorldCell(
         newX,
         user.worldCell.y,
         aiResponse.newWorldCell?.mapCharacter || ".",
