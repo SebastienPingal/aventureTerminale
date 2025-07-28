@@ -1,4 +1,5 @@
 import { PromptResponse } from "@/actions/promptProcessor"
+import { createUserTrace } from "@/actions/traces";
 import { ExtendedUser, WorldCell } from "@/lib/types"
 
 export async function executeCommand(
@@ -108,5 +109,16 @@ export async function executeCommand(
     })
 
     console.log('✅ Loot successfully added to inventory via proper workflow')
+  }
+
+  if (aiResponse.newTrace) {
+    console.log('🎒 Processing new trace from AI:', aiResponse.newTrace)
+
+    await createUserTrace(
+      user?.id || "",
+      user?.worldCell?.id || "",
+      aiResponse.newTrace.type,
+      aiResponse.newTrace.description || ""
+    )
   }
 }

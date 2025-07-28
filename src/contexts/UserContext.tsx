@@ -6,6 +6,7 @@ import { getMe, getUser, initializeUserPosition, updateUser } from '@/actions/us
 import { fetchWorldCellsInArea } from '@/actions/worldCell'
 import { createAndAddObjectToInventory } from '@/actions/object'
 import { Prisma } from '@/app/generated/prisma'
+import { createUserTrace } from '@/actions/traces'
 
 interface UserState {
   user: ExtendedUser | null
@@ -355,6 +356,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (direction === 'south') newY--
     if (direction === 'east') newX++
     if (direction === 'west') newX--
+
+    //generate a trace
+    await createUserTrace(state.user.id, state.user.worldCell.id, 'FOOTPRINT', 'Moved ' + direction)
 
     await updateUserData({ id: state.user.id }, {
       worldCell: { connect: { x_y: { x: newX, y: newY } } }

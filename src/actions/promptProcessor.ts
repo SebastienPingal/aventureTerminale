@@ -3,7 +3,7 @@
 import { GENERATION_CONFIG } from "@/lib/constants/ai"
 import Together from "together-ai"
 import { RARITY_EXPLANATIONS } from "@/lib/constants/world"
-import { Loot, WorldCell } from "@/lib/types"
+import { Loot, UserTraceType, WorldCell } from "@/lib/types"
 import { randomRarity } from "@/lib/helper"
 
 const together = new Together()
@@ -13,6 +13,10 @@ export interface PromptResponse {
   actions?: string[]
   newWorldCell?: Partial<WorldCell>
   newObject?: Loot
+  newTrace?: {
+    type: UserTraceType
+    description: string
+  }
 }
 
 export async function processPrompt(
@@ -58,6 +62,7 @@ INSTRUCTIONS:
 3. Si le joueur récupère un objet, crée-le
 4. Fournis une narration complète et immersive
 5. Considère l'influence des cellules environnantes sur la génération
+6. Si le joueur fait quelque chose qui pourrait laisser une trace signifiante, génère une trace avec le type approprié
 
 La rareté est la suivante :
 ${rarityExplanation}
@@ -70,6 +75,10 @@ Réponds TOUJOURS en JSON avec cette structure:
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
     "mapCharacter": "single ASCII char",
   } | null, // null si le joueur ne bouge pas ou se déplace dans une cellule existante
+  "newTrace": {
+    "type": "LOOT" | "MESSAGE" | "OTHER",
+    "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
+  } | null, // null si le joueur ne laisse pas de trace
   "newObject": {
     "name": "string",
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
@@ -107,8 +116,6 @@ Sois créatif et immersif dans tes réponses.
     console.error('❌ Error processing prompt:', error)
     return {
       narration: 'Le vent a emporté votre demande. Veuillez réessayer.',
-      actions: undefined,
-      newWorldCell: undefined
     }
   }
 } 

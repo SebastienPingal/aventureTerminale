@@ -19,6 +19,7 @@ model User {
   inventory     Loot[]
   Authenticator Authenticator[]
   journal       JournalEntry[]
+  traces        UserTrace[]
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -34,10 +35,10 @@ enum JournalEntryType {
 }
 
 model JournalEntry {
-  id      String      @id @default(uuid())
+  id      String           @id @default(uuid())
   content String
   type    JournalEntryType @default(SYSTEM)
-  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String
 
   createdAt DateTime @default(now())
@@ -54,16 +55,17 @@ model Loot {
 }
 
 model WorldCell {
-  id           String   @id @default(uuid())
+  id           String      @id @default(uuid())
   x            Int
   y            Int
-  mapCharacter String   @db.Char(1)
-  rarity       String   @default("commun")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  mapCharacter String      @db.Char(1)
+  rarity       String      @default("commun")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
   description  String
   title        String
   users        User[]
+  traces       UserTrace[]
 
   @@unique([x, y])
 }
@@ -120,4 +122,30 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
+}
+
+model UserTrace {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  worldCellId String
+  worldCell   WorldCell @relation(fields: [worldCellId], references: [id], onDelete: Cascade)
+
+  traceType   UserTraceType @default(FOOTPRINT)
+  intensity   Int           @default(100)
+  volatility  Int           @default(5)
+  description String?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime // When this trace disappears
+
+  @@index([worldCellId, expiresAt])
+  @@index([userId, createdAt])
+}
+
+enum UserTraceType {
+  FOOTPRINT
+  LOOT
+  OTHER
+  MESSAGE
 }
