@@ -17,6 +17,7 @@ export interface WorldCellWithUsers extends WorldCell {
 
 export interface ExtendedWorldCell extends WorldCell {
   users?: Array<User>
+  traces?: Array<UserTrace>
 }
 
 export type ExtendedUser = User & {

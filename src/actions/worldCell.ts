@@ -50,7 +50,10 @@ export async function fetchWorldCellsInArea(
       orderBy: [
         { y: 'asc' },
         { x: 'asc' }
-      ]
+      ],
+      include: {
+        traces: true
+      }
     })
 
     console.log(`✅ Successfully fetched ${cells.length} world cells in area`)

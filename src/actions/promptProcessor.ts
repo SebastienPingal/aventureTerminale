@@ -77,7 +77,7 @@ Réponds TOUJOURS en JSON avec cette structure:
   } | null, // null si le joueur ne bouge pas ou se déplace dans une cellule existante
   "newTrace": {
     "type": "LOOT" | "MESSAGE" | "OTHER",
-    "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
+    "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)", // description de la trace et du message si type est MESSAGE
   } | null, // null si le joueur ne laisse pas de trace
   "newObject": {
     "name": "string",
