@@ -1,13 +1,13 @@
 import { PromptResponse } from "@/actions/promptProcessor"
-import { useUser } from "@/contexts/UserContext"
-import { useWorldCell } from "@/contexts/WorldCellContext"
+import { ExtendedUser, WorldCell } from "@/lib/types"
 
 export async function executeCommand(
   aiResponse: PromptResponse,
+  user: ExtendedUser | null,
+  moveUser: (direction: string) => Promise<void>,
+  addObjectToInventory: (objectData: { name: string; description: string }) => Promise<void>,
+  createNewWorldCell: (x: number, y: number, mapCharacter: string, title: string, description: string) => Promise<WorldCell | null>
 ): Promise<void> {
-  const { user, moveUser, addObjectToInventory } = useUser()
-  const { createNewWorldCell } = useWorldCell()
-
   if (aiResponse.actions?.includes('move_north')) {
     try {
       if (!user?.worldCell) {

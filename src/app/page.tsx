@@ -6,13 +6,15 @@ import { useState } from "react"
 import { processPrompt } from "../actions/promptProcessor"
 import { executeCommand } from "@/lib/commands"
 import { useUser } from "@/contexts/UserContext"
+import { useWorldCell } from "@/contexts/WorldCellContext"
 import { useJournal } from "@/contexts/JournalContext"
 import { JournalEntryType } from "@/app/generated/prisma"
 import { createJournalEntry } from "@/actions/journalEntry"
 
 export default function Home() {
   const { journal, refreshJournal } = useJournal()
-  const { user, userWorldCell, surroundingCells, inventory } = useUser()
+  const { user, userWorldCell, surroundingCells, inventory, moveUser, addObjectToInventory } = useUser()
+  const { createNewWorldCell } = useWorldCell()
   const [currentInput, setCurrentInput] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -40,7 +42,7 @@ export default function Home() {
       }
 
       const aiResponse = await processPrompt(prompt, context)
-      await executeCommand(aiResponse)
+      await executeCommand(aiResponse, user, moveUser, addObjectToInventory, createNewWorldCell)
       await createJournalEntry(user?.id, aiResponse.narration, JournalEntryType.RESPONSE)
       await refreshJournal(user.id) // 📖 Refresh journal after adding response
 
