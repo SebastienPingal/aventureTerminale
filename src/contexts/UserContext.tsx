@@ -301,6 +301,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
           user.worldCell.y + 1
         )
 
+        const worldCell = user.worldCell
+        if (worldCell && worldCell.x !== undefined && worldCell.y !== undefined) {
+          const userWorldCell = allCells.find(cell => cell.x === worldCell.x && cell.y === worldCell.y)
+          dispatch({ type: 'SET_USER_WORLD_CELL', payload: userWorldCell || worldCell })
+        }
+
         const surroundingCells: {
           north?: WorldCell
           south?: WorldCell
@@ -326,7 +332,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         })
 
         dispatch({ type: 'SET_SURROUNDING_CELLS', payload: surroundingCells })
-        dispatch({ type: 'SET_USER_WORLD_CELL', payload: user.worldCell })
         dispatch({ type: 'SET_INVENTORY', payload: user.inventory || [] })
       }
 
