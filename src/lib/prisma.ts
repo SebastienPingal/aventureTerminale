@@ -1,27 +1,29 @@
+// lib/prisma.ts
 import { PrismaClient } from '@prisma/client'
-import { withAccelerate } from '@prisma/extension-accelerate'
 
-const globalForPrisma = global as unknown as {
-    prisma: PrismaClient
-}
+let prisma: PrismaClient
 
-const createPrismaClient = () => {
-    if (typeof window !== 'undefined') {
-        throw new Error('PrismaClient should not be used in the browser')
+if (process.env.NODE_ENV === 'development') {
+    // Use Accelerate in development
+    const { PrismaClient: AccelerateClient } = require('@prisma/client/edge')
+    const { withAccelerate } = require('@prisma/extension-accelerate')
+
+    const globalForPrisma = globalThis as unknown as {
+        prisma: PrismaClient | undefined
     }
 
-    // Use Accelerate only if the URL is configured for it
-    const client = new PrismaClient()
+    prisma = globalForPrisma.prisma ?? new AccelerateClient().$extends(withAccelerate())
 
-    if (process.env.DATABASE_URL?.startsWith('prisma://')) {
-        return client.$extends(withAccelerate())
+    if (process.env.NODE_ENV === 'development') globalForPrisma.prisma = prisma
+} else {
+    // Use standard client in production
+    const globalForPrisma = globalThis as unknown as {
+        prisma: PrismaClient | undefined
     }
 
-    return client
+    prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+    if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 }
 
-const prisma = globalForPrisma.prisma || createPrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-
-export default prisma
+export { prisma }
