@@ -8,7 +8,7 @@ let prisma
 if (process.env.NODE_ENV === 'development') {
     // Use Accelerate in development
     const globalForPrisma = globalThis as unknown as {
-        prisma: any
+        prisma: unknown
     }
 
     prisma = globalForPrisma.prisma ?? new AccelerateClient().$extends(withAccelerate())
@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === 'development') {
 } else {
     // Use standard client in production
     const globalForPrisma = globalThis as unknown as {
-        prisma: any
+        prisma: unknown
     }
 
     prisma = globalForPrisma.prisma ?? new PrismaClient()
