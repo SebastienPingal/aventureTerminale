@@ -69,6 +69,16 @@ export async function fetchWorldCellsInArea(
   }
 }
 
+export async function fetchWorldCell(x: number, y: number): Promise<WorldCell | null> {
+  const cell = await prisma.worldCell.findUnique({
+    where: { x_y: { x, y } },
+    include: {
+      traces: true
+    }
+  })
+  return cell
+}
+
 export async function createWorldCell(
   x: number,
   y: number,

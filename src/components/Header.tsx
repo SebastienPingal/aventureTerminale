@@ -1,14 +1,12 @@
+'use client'
+
 import { Separator } from "@/components/ui/separator"
 import { ToggleTheme } from "./ToggleTheme"
-import { auth, signOut } from "@/auth"
-import { getMe } from "@/actions/user"
+import { signOut } from "next-auth/react"
+import { useUser } from "@/contexts/UserContext"
 
-export default async function Header() {
-  const session = await auth()
-  const user = session ? await getMe() : null
-  const userWorldCell = user?.worldCell
-
-  console.log('✨ userWorldCell', userWorldCell)
+export default function Header() {
+  const { userWorldCell, user } = useUser()
 
   return (
     <header className="bg-background w-full pt-5 px-4">
@@ -18,23 +16,18 @@ export default async function Header() {
         </h1>
 
         <div className="flex items-center gap-2">
-          {session && (
+          {user && (
             <div className="flex items-center gap-2 text-sm">
-              <p>{session.user?.name}</p>
-              <form action={async () => {
-                "use server"
-
-                await signOut()
-              }}>
-                <button
-                  type="submit"
-                  className="text-sm underline cursor-pointer"
-                >
-                  Logout
-                </button>
-              </form>
+              <p>{user.name}</p>
+              <button
+                onClick={() => signOut()}
+                className="text-sm underline cursor-pointer"
+              >
+                Logout
+              </button>
             </div>
           )}
+
           <ToggleTheme />
         </div>
       </div>

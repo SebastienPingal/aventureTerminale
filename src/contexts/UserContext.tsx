@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode } from 'react'
 import { ExtendedUser, Loot, WorldCell } from '@/lib/types'
 import { getMe, getUser, initializeUserPosition, updateUser } from '@/actions/user'
-import { fetchWorldCellsInArea } from '@/actions/worldCell'
+import { fetchWorldCellsInArea, fetchWorldCell } from '@/actions/worldCell'
 import { createAndAddObjectToInventory } from '@/actions/object'
 import { Prisma } from '@/app/generated/prisma'
 import { createUserTrace } from '@/actions/traces'
@@ -122,7 +122,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             dispatch({ type: 'SET_USER', payload: value as ExtendedUser | null })
             break
           case 'userWorldCell':
-            if (value) dispatch({ type: 'SET_USER_WORLD_CELL', payload: value as WorldCell })
+            setUserWorldCell(value as WorldCell)
             break
           case 'surroundingCells':
             dispatch({ type: 'SET_SURROUNDING_CELLS', payload: value as { north?: WorldCell; south?: WorldCell; east?: WorldCell; west?: WorldCell } })
@@ -145,8 +145,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_USER', payload: user })
   }, [])
 
-  const setUserWorldCell = useCallback((worldCell: WorldCell) => {
-    dispatch({ type: 'SET_USER_WORLD_CELL', payload: worldCell })
+  const setUserWorldCell = useCallback(async (worldCell: WorldCell) => {
+    const userWorldCell = await fetchWorldCell(worldCell.x, worldCell.y)
+    dispatch({ type: 'SET_USER_WORLD_CELL', payload: userWorldCell || worldCell })
   }, [])
 
   const setSurroundingCells = useCallback((surroundingCells: {
@@ -211,7 +212,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
       })
 
-      dispatch({ type: 'SET_SURROUNDING_CELLS', payload: surroundingCells })
+      setUserWorldCell(state.user.worldCell)
       console.log(`✅ Updated surrounding cells:`, {
         north: surroundingCells.north?.title || 'empty',
         south: surroundingCells.south?.title || 'empty',
@@ -272,8 +273,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
           }
         })
 
-        dispatch({ type: 'SET_SURROUNDING_CELLS', payload: surroundingCells })
-        dispatch({ type: 'SET_USER_WORLD_CELL', payload: user.worldCell })
+        setSurroundingCells(surroundingCells)
+        setUserWorldCell(user.worldCell)
         dispatch({ type: 'SET_INVENTORY', payload: user.inventory || [] })
       }
     } catch (error) {
@@ -301,12 +302,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
           user.worldCell.y + 1
         )
 
-        const worldCell = user.worldCell
-        if (worldCell && worldCell.x !== undefined && worldCell.y !== undefined) {
-          const userWorldCell = allCells.find(cell => cell.x === worldCell.x && cell.y === worldCell.y)
-          dispatch({ type: 'SET_USER_WORLD_CELL', payload: userWorldCell || worldCell })
-        }
-
         const surroundingCells: {
           north?: WorldCell
           south?: WorldCell
@@ -331,8 +326,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
           }
         })
 
-        dispatch({ type: 'SET_SURROUNDING_CELLS', payload: surroundingCells })
+        setSurroundingCells(surroundingCells)
         dispatch({ type: 'SET_INVENTORY', payload: user.inventory || [] })
+        setUserWorldCell(user.worldCell)
       }
 
       if (!user?.worldCell) {
