@@ -1,13 +1,12 @@
-// lib/prisma.ts
 import { PrismaClient } from '@prisma/client'
+import { withAccelerate } from '@prisma/extension-accelerate'
+import { PrismaClient as AccelerateClient } from '@prisma/client/edge'
 
-let prisma: PrismaClient
+// Remove the type declaration, let TypeScript infer it
+let prisma
 
 if (process.env.NODE_ENV === 'development') {
     // Use Accelerate in development
-    const { PrismaClient: AccelerateClient } = require('@prisma/client/edge')
-    const { withAccelerate } = require('@prisma/extension-accelerate')
-
     const globalForPrisma = globalThis as unknown as {
         prisma: PrismaClient | undefined
     }
