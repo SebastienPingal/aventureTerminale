@@ -3,7 +3,7 @@
 import { GENERATION_CONFIG } from "@/lib/constants/ai"
 import Together from "together-ai"
 import { RARITY_EXPLANATIONS } from "@/lib/constants/world"
-import { ExtendedWorldCell, Loot, UserTraceType, WorldCell } from "@/lib/types"
+import { ExtendedWorldCell, Loot, UserTrace, UserTraceType } from "@/lib/types"
 import { randomRarity } from "@/lib/helper"
 
 const together = new Together()
@@ -44,9 +44,9 @@ export async function processPrompt(
   const rarityExplanation = RARITY_EXPLANATIONS[rarity as keyof typeof RARITY_EXPLANATIONS]
 
   // Helper function to format traces
-  const formatTraces = (traces?: Array<any>) => {
+  const formatTraces = (traces?: Array<UserTrace>) => {
     if (!traces || traces.length === 0) return "Aucune trace"
-    
+
     return traces
       .filter(trace => new Date(trace.expiresAt) > new Date()) // Only active traces
       .map(trace => {
