@@ -143,9 +143,16 @@ export async function getMe(): Promise<ExtendedUser | null> {
 
   const me = await getUser({ id: session.user.id })
 
+  // ✅ Fallback initialization if createUser event failed
   if (me && !me.worldCell) {
     console.log("⚠️ User without position detected, initializing fallback position...")
-    return await initializeUserPosition(me.id)
+    try {
+      return await initializeUserPosition(me.id)
+    } catch (error) {
+      console.error(`❌ Fallback initialization failed for user ${me.id}:`, error)
+      // Return user without position rather than failing completely
+      return me
+    }
   }
 
   return me
