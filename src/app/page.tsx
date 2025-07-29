@@ -8,7 +8,7 @@ import { executeCommand } from "@/lib/commands"
 import { useUser } from "@/contexts/UserContext"
 import { useWorldCell } from "@/contexts/WorldCellContext"
 import { useJournal } from "@/contexts/JournalContext"
-import { JournalEntryType } from "@/app/generated/prisma"
+import { JournalEntryType } from "@prisma/client"
 import { createJournalEntry } from "@/actions/journalEntry"
 
 export default function Home() {

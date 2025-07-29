@@ -1,7 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma"
-import { JournalEntryType } from "@/app/generated/prisma"
+import { JournalEntryType } from "@prisma/client"
 
 export const createJournalEntry = async (userId: string, content: string, type: JournalEntryType) => {
   try {

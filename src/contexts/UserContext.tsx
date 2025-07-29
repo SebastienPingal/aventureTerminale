@@ -5,7 +5,7 @@ import { ExtendedUser, Loot, WorldCell } from '@/lib/types'
 import { getMe, getUser, initializeUserPosition, updateUser } from '@/actions/user'
 import { fetchWorldCellsInArea, fetchWorldCell } from '@/actions/worldCell'
 import { createAndAddObjectToInventory } from '@/actions/object'
-import { Prisma } from '@/app/generated/prisma'
+import { Prisma } from '@prisma/client'
 import { createUserTrace } from '@/actions/traces'
 
 interface UserState {

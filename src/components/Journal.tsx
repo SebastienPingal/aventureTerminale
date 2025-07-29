@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react"
-import { JournalEntryType } from "@/app/generated/prisma"
+import { JournalEntryType } from "@prisma/client"
 import { JournalEntry } from "@/lib/types"
 
 interface JournalProps {

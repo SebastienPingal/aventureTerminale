@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma } from "@/app/generated/prisma"
+import { Prisma } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { ExtendedUser } from "@/lib/types"
 import { auth } from "@/auth"
@@ -8,7 +8,7 @@ import { generateRandomPosition } from "@/lib/helper"
 import { generateWorldCell } from "./generation"
 import { ASCII_ART, INTRO_TEXT, STARTER_LOCATIONS } from "@/lib/constants/world"
 import { createJournalEntry } from "./journalEntry"
-import { JournalEntryType } from "@/app/generated/prisma"
+import { JournalEntryType } from "@prisma/client"
 import { createWorldCell } from "./worldCell"
 
 export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<ExtendedUser | null> {
