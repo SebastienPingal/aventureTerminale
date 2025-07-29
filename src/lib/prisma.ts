@@ -10,13 +10,15 @@ const createPrismaClient = () => {
         throw new Error('PrismaClient should not be used in the browser')
     }
     
-    // Use Accelerate only if the URL is configured for it
     const client = new PrismaClient()
     
-    if (process.env.DATABASE_URL?.startsWith('prisma://')) {
+    // Only use Accelerate if explicitly configured for it
+    if (process.env.DATABASE_URL?.startsWith('prisma://') || 
+        process.env.DATABASE_URL?.startsWith('prisma+postgres://')) {
         return client.$extends(withAccelerate())
     }
     
+    // For regular PostgreSQL connections
     return client
 }
 
