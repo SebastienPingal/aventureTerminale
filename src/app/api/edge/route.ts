@@ -4,7 +4,7 @@ import { PrismaNeon } from '@prisma/adapter-neon'
 
 export const runtime = 'edge'
 
-export async function GET(request: Request) {
+export async function GET() {
   const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL })
   const prisma = new PrismaClient({ adapter })
 
