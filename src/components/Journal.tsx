@@ -66,7 +66,7 @@ export default function Journal({ journal, isProcessing }: JournalProps) {
           <div>
             <div className="flex items-center gap-2 animate-pulse">
               <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
-                Intéressant...
+                Un instant...
               </pre>
             </div>
           </div>
