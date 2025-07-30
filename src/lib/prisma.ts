@@ -2,22 +2,22 @@ import { PrismaClient } from '@prisma/client'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { PrismaClient as AccelerateClient } from '@prisma/client/edge'
 
-// Remove the type declaration, let TypeScript infer it
-let prisma
+// Use PrismaClient as the base type - extended client is compatible
+let prisma: PrismaClient
 
 if (process.env.NODE_ENV === 'development') {
     // Use Accelerate in development
     const globalForPrisma = globalThis as unknown as {
-        prisma: unknown
+        prisma: PrismaClient | undefined
     }
 
-    prisma = globalForPrisma.prisma ?? new AccelerateClient().$extends(withAccelerate())
+    prisma = globalForPrisma.prisma ?? new AccelerateClient().$extends(withAccelerate()) as any
 
     if (process.env.NODE_ENV === 'development') globalForPrisma.prisma = prisma
 } else {
     // Use standard client in production
     const globalForPrisma = globalThis as unknown as {
-        prisma: unknown
+        prisma: PrismaClient | undefined
     }
 
     prisma = globalForPrisma.prisma ?? new PrismaClient()
