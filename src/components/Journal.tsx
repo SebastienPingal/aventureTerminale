@@ -4,9 +4,10 @@ import { JournalEntry } from "@/lib/types"
 
 interface JournalProps {
   journal: JournalEntry[]
+  isProcessing?: boolean
 }
 
-export default function Journal({ journal }: JournalProps) {
+export default function Journal({ journal, isProcessing }: JournalProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -61,7 +62,17 @@ export default function Journal({ journal }: JournalProps) {
           </div>
         ))}
 
-        {journal.length === 0 && (
+        {isProcessing && (
+          <div>
+            <div className="flex items-center gap-2 animate-pulse">
+              <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
+                Intéressant...
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {journal.length === 0 && !isProcessing && (
           <div className="text-muted-foreground text-center p-8">
             <p>Bienvenue dans votre aventure...</p>
             <p className="text-sm mt-2">Commencez par vous présenter ou dites-moi ce que vous voulez faire!</p>

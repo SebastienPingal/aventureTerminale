@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex-1 overflow-hidden">
-        <Journal journal={journal} />
+        <Journal journal={journal} isProcessing={isProcessing} />
       </div>
 
       <div className="p-4 border-t">
@@ -81,10 +81,6 @@ export default function Home() {
             disabled={isProcessing}
             className="flex-1"
           />
-
-          {isProcessing && (
-            <span className="text-muted-foreground animate-pulse">⚡</span>
-          )}
         </div>
       </div>
     </div>
