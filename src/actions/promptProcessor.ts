@@ -76,6 +76,7 @@ CONTEXTE ACTUEL:
     Traces: ${formatTraces(context?.surroundingCells?.east?.traces)}
   Ouest: ${context?.surroundingCells?.west?.title || 'Inconnu'} - ${context?.surroundingCells?.west?.description || 'Inconnu'}
     Traces: ${formatTraces(context?.surroundingCells?.west?.traces)}
+- Inventaire: ${context?.playerInventory?.map(item => `${item.name} - ${item.description}`).join(", ")}
 
 INSTRUCTIONS:
 1. Analyse l'action du joueur
@@ -84,7 +85,7 @@ INSTRUCTIONS:
 4. Fournis une narration complète et immersive
 5. Considère l'influence des cellules environnantes sur la génération
 6. Si le joueur fait quelque chose qui pourrait laisser une trace signifiante, génère une trace avec le type approprié
-7. **IMPORTANT**: Mentionne les traces visibles dans ta narration quand c'est pertinent (empreintes, objets abandonnés, messages, etc.)
+7. **IMPORTANT**: Mentionne les traces visibles dans ta narration quand c'est pertinent (empreintes, objets abandonnés, messages, etc.) si il n'y en a pas, ne mentionne pas les traces
 
 La rareté est la suivante :
 ${rarityExplanation}
