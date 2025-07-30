@@ -42,7 +42,7 @@ export default function Journal({ journal, isProcessing }: JournalProps) {
                   </pre>
                 </div>
               </div>
-            ) : entry.type === JournalEntryType.ERROR ? (
+            ) : entry.type === JournalEntryType.ERROR && index === journal.length - 1 ? (
               <div className="rounded p-2 bg-destructive/10 border border-destructive/20">
                 <div className="flex items-center gap-2">
                   <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-destructive text-justify">
@@ -50,7 +50,7 @@ export default function Journal({ journal, isProcessing }: JournalProps) {
                   </pre>
                 </div>
               </div>
-            ) : (
+            ) : entry.type !== JournalEntryType.ERROR ? (
               <div>
                 <div className="flex items-center gap-2">
                   <pre className="whitespace-pre-wrap bg-transparent p-0 m-0 font-[family-name:var(--font-syne-mono)] text-justify">
@@ -58,7 +58,7 @@ export default function Journal({ journal, isProcessing }: JournalProps) {
                   </pre>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         ))}
 
