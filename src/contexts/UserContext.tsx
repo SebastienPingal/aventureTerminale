@@ -112,35 +112,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     error: null
   })
 
-  // 🔄 Load from localStorage on mount
-  useEffect(() => {
-    const storedState = loadFromStorage()
-    if (Object.keys(storedState).length > 0) {
-      Object.entries(storedState).forEach(([key, value]) => {
-        switch (key) {
-          case 'user':
-            dispatch({ type: 'SET_USER', payload: value as ExtendedUser | null })
-            break
-          case 'userWorldCell':
-            setUserWorldCell(value as WorldCell)
-            break
-          case 'surroundingCells':
-            dispatch({ type: 'SET_SURROUNDING_CELLS', payload: value as { north?: WorldCell; south?: WorldCell; east?: WorldCell; west?: WorldCell } })
-            break
-          case 'inventory':
-            dispatch({ type: 'SET_INVENTORY', payload: value as Loot[] })
-            break
-        }
-      })
-    }
-  }, [])
-
-  // 💾 Save to localStorage whenever state changes
-  useEffect(() => {
-    saveToStorage(state)
-  }, [state])
-
-  // 🎯 Memoized setter functions
+  // 🎯 Memoized setter functions (moved before useEffect)
   const setUser = useCallback((user: ExtendedUser | null) => {
     dispatch({ type: 'SET_USER', payload: user })
   }, [])
@@ -170,6 +142,38 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const setError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_ERROR', payload: error })
   }, [])
+
+  // 🔄 Load from localStorage on mount
+  useEffect(() => {
+    const loadStoredState = async () => {
+      const storedState = loadFromStorage()
+      if (Object.keys(storedState).length > 0) {
+        for (const [key, value] of Object.entries(storedState)) {
+          switch (key) {
+            case 'user':
+              dispatch({ type: 'SET_USER', payload: value as ExtendedUser | null })
+              break
+            case 'userWorldCell':
+              await setUserWorldCell(value as WorldCell)
+              break
+            case 'surroundingCells':
+              dispatch({ type: 'SET_SURROUNDING_CELLS', payload: value as { north?: WorldCell; south?: WorldCell; east?: WorldCell; west?: WorldCell } })
+              break
+            case 'inventory':
+              dispatch({ type: 'SET_INVENTORY', payload: value as Loot[] })
+              break
+          }
+        }
+      }
+    }
+    
+    loadStoredState()
+  }, [setUserWorldCell])
+
+  // 💾 Save to localStorage whenever state changes
+  useEffect(() => {
+    saveToStorage(state)
+  }, [state])
 
   // 🎯 Memoized async functions
   const updateSurroundingCells = useCallback(async () => {
