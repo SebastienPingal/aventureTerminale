@@ -88,7 +88,7 @@ export function JournalProvider({ children }: { children: ReactNode }) {
   const refreshJournal = async (userId: string) => {
     try {
       const journalEntries = await getUserJournalEntries(userId)
-      dispatch({ type: 'SET_JOURNAL', payload: journalEntries })
+      setJournal(journalEntries)
     } catch (error) {
       console.error('📖 Failed to refresh journal:', error)
     }
