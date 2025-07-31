@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -64,6 +64,7 @@ model WorldCell {
   description  String
   title        String
   users        User[]
+  weather      String      @default("neutral")
   traces       UserTrace[]
 
   @@unique([x, y])
@@ -136,9 +137,7 @@ model UserTrace {
   description String?
 
   createdAt DateTime @default(now())
-  expiresAt DateTime // When this trace disappears
 
-  @@index([worldCellId, expiresAt])
   @@index([userId, createdAt])
 }
 

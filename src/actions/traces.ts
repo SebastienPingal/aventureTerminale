@@ -46,33 +46,24 @@ export async function fetchActiveTracesInCell(
   })
 }
 
-export async function cleanupExpiredTraces(): Promise<number> {
-  const result = await prisma.userTrace.deleteMany({
-    where: {
-      expiresAt: { lt: new Date() }
-    }
-  })
-
-  console.log(`🧹 Cleaned up ${result.count} expired traces`)
-  return result.count
-}
-
 // Decay trace intensity over time
 export async function updateTraceIntensity(): Promise<void> {
-  const traces = await prisma.userTrace.findMany({
-    where: { expiresAt: { gt: new Date() } }
-  })
+  const traces = await prisma.userTrace.findMany()
 
   for (const trace of traces) {
-    const ageHours = (Date.now() - trace.createdAt.getTime()) / (1000 * 60 * 60)
-    const maxHours = (trace.expiresAt.getTime() - trace.createdAt.getTime()) / (1000 * 60 * 60)
-    const newIntensity = Math.max(10, 100 - Math.floor((ageHours / maxHours) * 90))
+    const newIntensity = trace.intensity - trace.volatility
 
-    if (newIntensity !== trace.intensity) {
+    if (newIntensity < 0) {
+      await prisma.userTrace.delete({
+        where: { id: trace.id }
+      })
+
+    } else {
       await prisma.userTrace.update({
         where: { id: trace.id },
         data: { intensity: newIntensity }
       })
     }
+
   }
 }
