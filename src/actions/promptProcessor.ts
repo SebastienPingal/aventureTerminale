@@ -5,6 +5,13 @@ import Together from "together-ai"
 import { RARITY_EXPLANATIONS } from "@/lib/constants/world"
 import { ExtendedWorldCell, Loot, UserTrace, UserTraceType } from "@/lib/types"
 import { randomRarity } from "@/lib/helper"
+import { createJournalEntry, getUserJournalEntries } from "./journalEntry"
+import { JournalEntryType } from "@prisma/client"
+import { getUser, updateUser } from "./user"
+import { fetchWorldCell, createWorldCell } from "./worldCell"
+import { createUserTrace } from "./traces"
+import { createAndAddObjectToInventory } from "./object"
+import { ExtendedUser } from "@/lib/types"
 
 const together = new Together()
 
@@ -140,5 +147,191 @@ Sois créatif et immersif dans tes réponses.
     return {
       narration: 'Le vent a emporté votre demande. Veuillez réessayer.',
     }
+  }
+}
+
+/**
+ * 🚀 COMPREHENSIVE: Handles the entire prompt processing workflow server-side
+ * This prevents issues with page refreshes interrupting the process
+ */
+export async function processUserPrompt(
+  userId: string, 
+  prompt: string
+): Promise<{
+  success: boolean
+  message?: string
+  shouldRefreshData?: boolean
+}> {
+  try {
+    console.log('🚀 Starting comprehensive prompt processing for user:', userId)
+
+    // 1. Create journal entry for the prompt
+    await createJournalEntry(userId, prompt, JournalEntryType.PROMPT)
+
+    // 2. Get user data and context
+    const user = await getUser({ id: userId })
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Get surrounding cells for context
+    const surroundingCells: any = {}
+    if (user.worldCell) {
+      const [north, south, east, west] = await Promise.all([
+        fetchWorldCell(user.worldCell.x, user.worldCell.y + 1),
+        fetchWorldCell(user.worldCell.x, user.worldCell.y - 1), 
+        fetchWorldCell(user.worldCell.x + 1, user.worldCell.y),
+        fetchWorldCell(user.worldCell.x - 1, user.worldCell.y)
+      ])
+      
+      surroundingCells.north = north
+      surroundingCells.south = south  
+      surroundingCells.east = east
+      surroundingCells.west = west
+    }
+
+    // Get recent journal entries for context
+    const recentJournal = await getUserJournalEntries(userId)
+    
+    const context = {
+      user: user,
+      currentLocation: user.worldCell?.title,
+      previousMessages: recentJournal.slice(-6).map(entry => entry.content),
+      playerInventory: user.inventory,
+      currentCell: user.worldCell || undefined,
+      surroundingCells: surroundingCells
+    }
+
+    // 3. Process prompt with AI
+    const aiResponse = await processPrompt(prompt, context)
+
+    // 4. Execute all commands in sequence (server-side)
+    await executeCommandsServerSide(aiResponse, user)
+
+    // 5. Create response journal entry
+    await createJournalEntry(userId, aiResponse.narration, JournalEntryType.RESPONSE)
+
+    console.log('✅ Comprehensive prompt processing completed successfully')
+    return { 
+      success: true, 
+      shouldRefreshData: true 
+    }
+
+  } catch (error) {
+    console.error('❌ Error in comprehensive prompt processing:', error)
+    
+    // Create error journal entry
+    try {
+      await createJournalEntry(userId, 'Une erreur est survenue lors du traitement de votre demande.', JournalEntryType.ERROR)
+    } catch (journalError) {
+      console.error('❌ Error creating error journal entry:', journalError)
+    }
+
+    return { 
+      success: false, 
+      message: 'Une erreur est survenue lors du traitement de votre demande.',
+      shouldRefreshData: true 
+    }
+  }
+}
+
+/**
+ * 🎯 Server-side command execution (moved from client-side executeCommand)
+ */
+async function executeCommandsServerSide(
+  aiResponse: PromptResponse,
+  user: ExtendedUser
+): Promise<void> {
+  if (!user.worldCell) {
+    throw new Error('User has no world cell')
+  }
+
+  // Handle movement actions
+  if (aiResponse.actions?.includes('move_north')) {
+    const newY = user.worldCell.y + 1
+    await handleMovement(user, user.worldCell.x, newY, 'north', aiResponse)
+  } else if (aiResponse.actions?.includes('move_south')) {
+    const newY = user.worldCell.y - 1  
+    await handleMovement(user, user.worldCell.x, newY, 'south', aiResponse)
+  } else if (aiResponse.actions?.includes('move_east')) {
+    const newX = user.worldCell.x + 1
+    await handleMovement(user, newX, user.worldCell.y, 'east', aiResponse)
+  } else if (aiResponse.actions?.includes('move_west')) {
+    const newX = user.worldCell.x - 1
+    await handleMovement(user, newX, user.worldCell.y, 'west', aiResponse)
+  }
+
+  // Handle new objects
+  if (aiResponse.newObject) {
+    console.log('🎒 Processing new object from AI:', aiResponse.newObject)
+    await createAndAddObjectToInventory(user.id, {
+      name: aiResponse.newObject.name || "",
+      description: aiResponse.newObject.description || ""
+    })
+    console.log('✅ Loot successfully added to inventory')
+  }
+
+  // Handle new traces
+  if (aiResponse.newTrace) {
+    console.log('👣 Processing new trace from AI:', aiResponse.newTrace)
+    await createUserTrace(
+      user.id,
+      user.worldCell.id,
+      aiResponse.newTrace.type,
+      aiResponse.newTrace.description || ""
+    )
+    console.log('✅ Trace successfully created')
+  }
+}
+
+/**
+ * 🏃 Handle user movement with world cell creation
+ */
+async function handleMovement(
+  user: ExtendedUser,
+  newX: number,
+  newY: number,
+  direction: string,
+  aiResponse: PromptResponse
+): Promise<void> {
+  try {
+    // Check if target cell exists, create if needed
+    let targetCell = await fetchWorldCell(newX, newY)
+    
+    if (!targetCell && aiResponse.newWorldCell) {
+      console.log(`🏗️ Creating new world cell at (${newX},${newY})`)
+      targetCell = await createWorldCell(
+        newX,
+        newY,
+        aiResponse.newWorldCell.mapCharacter || ".",
+        aiResponse.newWorldCell.title || "Unknown",
+        aiResponse.newWorldCell.description || "A mysterious place"
+      )
+    }
+
+    if (!targetCell) {
+      throw new Error(`Failed to create or find world cell at (${newX},${newY})`)
+    }
+
+    // Create movement trace at current location
+    if (user.worldCell) {
+      await createUserTrace(
+        user.id, 
+        user.worldCell.id, 
+        'FOOTPRINT', 
+        `Moved ${direction}`
+      )
+    }
+
+    // Move user to new cell
+    await updateUser({ id: user.id }, {
+      worldCell: { connect: { x_y: { x: newX, y: newY } } }
+    })
+
+    console.log(`🏜️ User moved ${direction} to (${newX},${newY})`)
+
+  } catch (error) {
+    console.error(`❌ Error handling movement ${direction}:`, error)
+    throw error
   }
 } 

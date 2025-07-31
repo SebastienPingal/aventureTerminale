@@ -3,60 +3,44 @@
 import { Input } from "@/components/ui/input"
 import Journal from "@/components/Journal"
 import { useState } from "react"
-import { processPrompt } from "../actions/promptProcessor"
-import { executeCommand } from "@/lib/commands"
+import { processUserPrompt } from "../actions/promptProcessor"
 import { useUser } from "@/contexts/UserContext"
-import { useWorldCell } from "@/contexts/WorldCellContext"
 import { useJournal } from "@/contexts/JournalContext"
-import { JournalEntryType } from "@prisma/client"
-import { createJournalEntry } from "@/actions/journalEntry"
 
 export default function Home() {
   const { journal, refreshJournal } = useJournal()
-  const { user, userWorldCell, surroundingCells, inventory, moveUser, addObjectToInventory } = useUser()
-  const { createNewWorldCell } = useWorldCell()
+  const { user, getMe } = useUser()
   const [currentInput, setCurrentInput] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
 
   const handlePrompt = async (prompt: string) => {
-    if (!prompt.trim()) return
+    if (!prompt.trim() || !user?.id || isProcessing) return
 
     setIsProcessing(true)
 
-    if (!user?.id) {
-      console.error('❌ User not authenticated')
-      return
-    }
-
     try {
-      await createJournalEntry(user.id, prompt, JournalEntryType.PROMPT)
-      await refreshJournal(user.id) // 📖 Refresh journal after adding prompt
-
-      const context = {
-        user: user,
-        currentLocation: userWorldCell?.title,
-        previousMessages: journal.slice(-6).map(entry => entry.content),
-        playerInventory: inventory,
-        currentCell: userWorldCell || undefined,
-        surroundingCells: surroundingCells
+      const result = await processUserPrompt(user.id, prompt)
+      
+      if (result.success) {
+        console.log('✅ Prompt processed successfully')
+      } else {
+        console.error('❌ Prompt processing failed:', result.message)
       }
 
-      const aiResponse = await processPrompt(prompt, context)
-      await executeCommand(aiResponse, user, moveUser, addObjectToInventory, createNewWorldCell)
-      await createJournalEntry(user?.id, aiResponse.narration, JournalEntryType.RESPONSE)
-      await refreshJournal(user.id) // 📖 Refresh journal after adding response
+      // Refresh all data from server
+      if (result.shouldRefreshData) {
+        await Promise.all([
+          refreshJournal(user.id),
+          getMe() // This will refresh user data, world cell, inventory, etc.
+        ])
+      }
 
     } catch (error) {
       console.error('❌ Error processing prompt:', error)
-
-      await createJournalEntry(user.id, 'Une erreur est survenue lors du traitement de votre demande.', JournalEntryType.ERROR)
-      await refreshJournal(user.id) // 📖 Refresh journal after adding error
-
     } finally {
       setIsProcessing(false)
+      setCurrentInput("")
     }
-
-    setCurrentInput("")
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
