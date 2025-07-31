@@ -155,7 +155,7 @@ Sois créatif et immersif dans tes réponses.
  * This prevents issues with page refreshes interrupting the process
  */
 export async function processUserPrompt(
-  userId: string, 
+  userId: string,
   prompt: string
 ): Promise<{
   success: boolean
@@ -175,24 +175,24 @@ export async function processUserPrompt(
     }
 
     // Get surrounding cells for context
-    const surroundingCells: any = {}
+    const surroundingCells: { north?: ExtendedWorldCell, south?: ExtendedWorldCell, east?: ExtendedWorldCell, west?: ExtendedWorldCell } = {}
     if (user.worldCell) {
       const [north, south, east, west] = await Promise.all([
         fetchWorldCell(user.worldCell.x, user.worldCell.y + 1),
-        fetchWorldCell(user.worldCell.x, user.worldCell.y - 1), 
+        fetchWorldCell(user.worldCell.x, user.worldCell.y - 1),
         fetchWorldCell(user.worldCell.x + 1, user.worldCell.y),
         fetchWorldCell(user.worldCell.x - 1, user.worldCell.y)
       ])
-      
-      surroundingCells.north = north
-      surroundingCells.south = south  
-      surroundingCells.east = east
-      surroundingCells.west = west
+
+      surroundingCells.north = north || undefined
+      surroundingCells.south = south || undefined
+      surroundingCells.east = east || undefined
+      surroundingCells.west = west || undefined
     }
 
     // Get recent journal entries for context
     const recentJournal = await getUserJournalEntries(userId)
-    
+
     const context = {
       user: user,
       currentLocation: user.worldCell?.title,
@@ -212,14 +212,14 @@ export async function processUserPrompt(
     await createJournalEntry(userId, aiResponse.narration, JournalEntryType.RESPONSE)
 
     console.log('✅ Comprehensive prompt processing completed successfully')
-    return { 
-      success: true, 
-      shouldRefreshData: true 
+    return {
+      success: true,
+      shouldRefreshData: true
     }
 
   } catch (error) {
     console.error('❌ Error in comprehensive prompt processing:', error)
-    
+
     // Create error journal entry
     try {
       await createJournalEntry(userId, 'Une erreur est survenue lors du traitement de votre demande.', JournalEntryType.ERROR)
@@ -227,10 +227,10 @@ export async function processUserPrompt(
       console.error('❌ Error creating error journal entry:', journalError)
     }
 
-    return { 
-      success: false, 
+    return {
+      success: false,
       message: 'Une erreur est survenue lors du traitement de votre demande.',
-      shouldRefreshData: true 
+      shouldRefreshData: true
     }
   }
 }
@@ -251,7 +251,7 @@ async function executeCommandsServerSide(
     const newY = user.worldCell.y + 1
     await handleMovement(user, user.worldCell.x, newY, 'north', aiResponse)
   } else if (aiResponse.actions?.includes('move_south')) {
-    const newY = user.worldCell.y - 1  
+    const newY = user.worldCell.y - 1
     await handleMovement(user, user.worldCell.x, newY, 'south', aiResponse)
   } else if (aiResponse.actions?.includes('move_east')) {
     const newX = user.worldCell.x + 1
@@ -297,7 +297,7 @@ async function handleMovement(
   try {
     // Check if target cell exists, create if needed
     let targetCell = await fetchWorldCell(newX, newY)
-    
+
     if (!targetCell && aiResponse.newWorldCell) {
       console.log(`🏗️ Creating new world cell at (${newX},${newY})`)
       targetCell = await createWorldCell(
@@ -316,9 +316,9 @@ async function handleMovement(
     // Create movement trace at current location
     if (user.worldCell) {
       await createUserTrace(
-        user.id, 
-        user.worldCell.id, 
-        'FOOTPRINT', 
+        user.id,
+        user.worldCell.id,
+        'FOOTPRINT',
         `Moved ${direction}`
       )
     }
