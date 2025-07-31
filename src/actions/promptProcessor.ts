@@ -8,7 +8,7 @@ import { randomRarity } from "@/lib/helper"
 import { createJournalEntry, getUserJournalEntries } from "./journalEntry"
 import { JournalEntryType } from "@prisma/client"
 import { getUser, updateUser } from "./user"
-import { fetchWorldCell, createWorldCell } from "./worldCell"
+import { fetchWorldCell, createWorldCell, updateWorldCell } from "./worldCell"
 import { createUserTrace } from "./traces"
 import { createAndAddObjectToInventory } from "./object"
 import { ExtendedUser } from "@/lib/types"
@@ -19,6 +19,7 @@ export interface PromptResponse {
   narration: string
   actions?: string[]
   newWorldCell?: Partial<ExtendedWorldCell>
+  updateWorldCell?: Partial<ExtendedWorldCell>
   newObject?: Loot
   newTrace?: {
     type: UserTraceType
@@ -92,7 +93,8 @@ INSTRUCTIONS:
 4. Fournis une narration complète et immersive
 5. Considère l'influence des cellules environnantes sur la génération
 6. Si le joueur fait quelque chose qui pourrait laisser une trace signifiante, génère une trace avec le type approprié
-7. **IMPORTANT**: Mentionne les traces visibles dans ta narration quand c'est pertinent (empreintes, objets abandonnés, messages, etc.) si il n'y en a pas, ne mentionne pas les traces
+7. Si le joueur fait quelque chose qui impacterait majoritairement la cellule, modifie la description de la cellule, et le titre si nécessaire
+8. **IMPORTANT**: Mentionne les traces visibles dans ta narration quand c'est pertinent (empreintes, objets abandonnés, messages, etc.) si il n'y en a pas, ne mentionne pas les traces
 
 La rareté est la suivante :
 ${rarityExplanation}
@@ -105,6 +107,11 @@ Réponds TOUJOURS en JSON avec cette structure:
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
     "mapCharacter": "single ASCII char",
   } | null, // null si le joueur ne bouge pas ou se déplace dans une cellule existante
+  "updateWorldCell": {
+    "title": "string",
+    "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
+    "mapCharacter": "single ASCII char",
+  } | null, // null si le joueur ne modifie pas la cellule
   "newTrace": {
     "type": "LOOT" | "MESSAGE" | "OTHER",
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)", // description de la trace et du message si type est MESSAGE
@@ -281,6 +288,17 @@ async function executeCommandsServerSide(
       aiResponse.newTrace.description || ""
     )
     console.log('✅ Trace successfully created')
+  }
+
+  // Handle world cell update
+  if (aiResponse.updateWorldCell) {
+    console.log('🏗️ Processing world cell update from AI:', aiResponse.updateWorldCell)
+    await updateWorldCell(user.worldCell.id, {
+      title: aiResponse.updateWorldCell.title,
+      description: aiResponse.updateWorldCell.description,
+      mapCharacter: aiResponse.updateWorldCell.mapCharacter
+    })
+    console.log('✅ World cell successfully updated')
   }
 }
 

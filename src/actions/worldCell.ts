@@ -111,3 +111,11 @@ export async function createWorldCell(
     throw new Error("Failed to create world cell")
   }
 }
+
+export async function updateWorldCell(id: string, data: Partial<WorldCell>): Promise<WorldCell> {
+  const cell = await prisma.worldCell.update({
+    where: { id },
+    data
+  })
+  return cell
+}
