@@ -78,7 +78,7 @@ export async function processPrompt(
     east: { x: context.playerPosition.x + 1, y: context.playerPosition.y },
     west: { x: context.playerPosition.x - 1, y: context.playerPosition.y }
   }
-  
+
   const surroundingCellsAtmosphericData = {
     north: calculateAtmosphericData(surroundingPositions.north.x, surroundingPositions.north.y),
     south: calculateAtmosphericData(surroundingPositions.south.x, surroundingPositions.south.y),
@@ -170,6 +170,8 @@ Réponds TOUJOURS en JSON avec cette structure:
 Contexte actuel: ${context?.currentLocation || 'Début de l\'aventure'}
 Sois créatif et immersif dans tes réponses.
 `
+
+  console.log('🤖 System prompt:', systemPrompt)
 
   try {
     const response = await together.chat.completions.create({
