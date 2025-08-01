@@ -8,18 +8,13 @@ export async function createUserTrace(
   worldCellId: string,
   traceType: UserTraceType = 'FOOTPRINT',
   description?: string,
-  durationHours: number = 24
 ): Promise<UserTrace> {
-  const expiresAt = new Date()
-  expiresAt.setHours(expiresAt.getHours() + durationHours)
-
   return await prisma.userTrace.create({
     data: {
       userId,
       worldCellId,
       traceType,
       description,
-      expiresAt,
       intensity: 100
     },
     include: {
@@ -36,7 +31,6 @@ export async function fetchActiveTracesInCell(
   return await prisma.userTrace.findMany({
     where: {
       worldCellId,
-      expiresAt: { gt: new Date() },
       userId: excludeUserId ? { not: excludeUserId } : undefined
     },
     include: {
