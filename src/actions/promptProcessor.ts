@@ -4,7 +4,7 @@ import { GENERATION_CONFIG } from "@/lib/constants/ai"
 import Together from "together-ai"
 import { RARITY_EXPLANATIONS } from "@/lib/constants/world"
 import { ExtendedWorldCell, Loot, UserTrace, UserTraceType } from "@/lib/types"
-import { randomRarity } from "@/lib/helper"
+import { randomRarity, calculateAtmosphericData } from "@/lib/helper"
 import { createJournalEntry, getUserJournalEntries } from "./journalEntry"
 import { JournalEntryType } from "@prisma/client"
 import { getUser, updateUser } from "./user"
@@ -39,7 +39,7 @@ export async function processPrompt(
     playerInventory?: Loot[]
     currentCell?: ExtendedWorldCell
     surroundingCells?: {
-      north?: ExtendedWorldCell // Updated to ExtendedWorldCell since they include traces
+      north?: ExtendedWorldCell
       south?: ExtendedWorldCell
       east?: ExtendedWorldCell
       west?: ExtendedWorldCell
@@ -56,7 +56,6 @@ export async function processPrompt(
     if (!traces || traces.length === 0) return "Aucune trace"
 
     return traces
-      .filter(trace => new Date(trace.expiresAt) > new Date()) // Only active traces
       .map(trace => {
         const traceInfo = `${trace.traceType}`
         if (trace.description) {
@@ -67,6 +66,26 @@ export async function processPrompt(
       .join(", ") || "Aucune trace active"
   }
 
+  if (!context?.playerPosition) throw new Error("Player position is required")
+
+  // Get atmospheric data for current location
+  const atmosphericData = calculateAtmosphericData(context.playerPosition.x, context.playerPosition.y)
+
+  // Calculate atmospheric data for all surrounding positions (even if cells don't exist yet)
+  const surroundingPositions = {
+    north: { x: context.playerPosition.x, y: context.playerPosition.y + 1 },
+    south: { x: context.playerPosition.x, y: context.playerPosition.y - 1 },
+    east: { x: context.playerPosition.x + 1, y: context.playerPosition.y },
+    west: { x: context.playerPosition.x - 1, y: context.playerPosition.y }
+  }
+  
+  const surroundingCellsAtmosphericData = {
+    north: calculateAtmosphericData(surroundingPositions.north.x, surroundingPositions.north.y),
+    south: calculateAtmosphericData(surroundingPositions.south.x, surroundingPositions.south.y),
+    east: calculateAtmosphericData(surroundingPositions.east.x, surroundingPositions.east.y),
+    west: calculateAtmosphericData(surroundingPositions.west.x, surroundingPositions.west.y)
+  }
+
   const systemPrompt = `
 Tu es un maître de jeu pour une aventure textuelle dans un monde post-apocalyptique désertique.
 Le monde est ancien, désolé, sans vie. L'ambiance est contemplative et mystérieuse, sans violence.
@@ -74,16 +93,41 @@ Tu vouvoies le joueur.
 
 CONTEXTE ACTUEL:
 - Lieu actuel: ${context?.currentCell?.title} - ${context?.currentCell?.description}
+- Conditions atmosphériques: 
+  * Humidité: ${(atmosphericData.humidity * 100).toFixed(0)}% (${atmosphericData.humidity < 0.3 ? 'sec' : atmosphericData.humidity > 0.7 ? 'humide' : 'modéré'})
+  * Température: ${(atmosphericData.temperature * 100).toFixed(0)}% (${atmosphericData.temperature < 0.3 ? 'froid' : atmosphericData.temperature > 0.7 ? 'chaud' : 'tempéré'})
+  * Pression: ${(atmosphericData.pressure * 100).toFixed(0)}% (${atmosphericData.pressure < 0.3 ? 'basse' : atmosphericData.pressure > 0.7 ? 'haute' : 'normale'})
+  * Turbulence: ${(atmosphericData.turbulence * 100).toFixed(0)}% (${atmosphericData.turbulence < 0.3 ? 'calme' : atmosphericData.turbulence > 0.7 ? 'agité' : 'stable'})
 - Traces présentes: ${formatTraces(context?.currentCell?.traces)}
 - Cellules environnantes:
   Nord: ${context?.surroundingCells?.north?.title || 'Inconnu'} - ${context?.surroundingCells?.north?.description || 'Inconnu'}
     Traces: ${formatTraces(context?.surroundingCells?.north?.traces)}
+    Conditions atmosphériques: 
+      * Humidité: ${(surroundingCellsAtmosphericData.north.humidity * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.north.humidity < 0.3 ? 'sec' : surroundingCellsAtmosphericData.north.humidity > 0.7 ? 'humide' : 'modéré'})
+      * Température: ${(surroundingCellsAtmosphericData.north.temperature * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.north.temperature < 0.3 ? 'froid' : surroundingCellsAtmosphericData.north.temperature > 0.7 ? 'chaud' : 'tempéré'})
+      * Pression: ${(surroundingCellsAtmosphericData.north.pressure * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.north.pressure < 0.3 ? 'basse' : surroundingCellsAtmosphericData.north.pressure > 0.7 ? 'haute' : 'normale'})
+      * Turbulence: ${(surroundingCellsAtmosphericData.north.turbulence * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.north.turbulence < 0.3 ? 'calme' : surroundingCellsAtmosphericData.north.turbulence > 0.7 ? 'agité' : 'stable'})
   Sud: ${context?.surroundingCells?.south?.title || 'Inconnu'} - ${context?.surroundingCells?.south?.description || 'Inconnu'}
     Traces: ${formatTraces(context?.surroundingCells?.south?.traces)}
+    Conditions atmosphériques: 
+      * Humidité: ${(surroundingCellsAtmosphericData.south.humidity * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.south.humidity < 0.3 ? 'sec' : surroundingCellsAtmosphericData.south.humidity > 0.7 ? 'humide' : 'modéré'})
+      * Température: ${(surroundingCellsAtmosphericData.south.temperature * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.south.temperature < 0.3 ? 'froid' : surroundingCellsAtmosphericData.south.temperature > 0.7 ? 'chaud' : 'tempéré'})
+      * Pression: ${(surroundingCellsAtmosphericData.south.pressure * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.south.pressure < 0.3 ? 'basse' : surroundingCellsAtmosphericData.south.pressure > 0.7 ? 'haute' : 'normale'})
+      * Turbulence: ${(surroundingCellsAtmosphericData.south.turbulence * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.south.turbulence < 0.3 ? 'calme' : surroundingCellsAtmosphericData.south.turbulence > 0.7 ? 'agité' : 'stable'})
   Est: ${context?.surroundingCells?.east?.title || 'Inconnu'} - ${context?.surroundingCells?.east?.description || 'Inconnu'}
     Traces: ${formatTraces(context?.surroundingCells?.east?.traces)}
+    Conditions atmosphériques: 
+      * Humidité: ${(surroundingCellsAtmosphericData.east.humidity * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.east.humidity < 0.3 ? 'sec' : surroundingCellsAtmosphericData.east.humidity > 0.7 ? 'humide' : 'modéré'})
+      * Température: ${(surroundingCellsAtmosphericData.east.temperature * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.east.temperature < 0.3 ? 'froid' : surroundingCellsAtmosphericData.east.temperature > 0.7 ? 'chaud' : 'tempéré'})
+      * Pression: ${(surroundingCellsAtmosphericData.east.pressure * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.east.pressure < 0.3 ? 'basse' : surroundingCellsAtmosphericData.east.pressure > 0.7 ? 'haute' : 'normale'})
+      * Turbulence: ${(surroundingCellsAtmosphericData.east.turbulence * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.east.turbulence < 0.3 ? 'calme' : surroundingCellsAtmosphericData.east.turbulence > 0.7 ? 'agité' : 'stable'})
   Ouest: ${context?.surroundingCells?.west?.title || 'Inconnu'} - ${context?.surroundingCells?.west?.description || 'Inconnu'}
     Traces: ${formatTraces(context?.surroundingCells?.west?.traces)}
+    Conditions atmosphériques: 
+      * Humidité: ${(surroundingCellsAtmosphericData.west.humidity * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.west.humidity < 0.3 ? 'sec' : surroundingCellsAtmosphericData.west.humidity > 0.7 ? 'humide' : 'modéré'})
+      * Température: ${(surroundingCellsAtmosphericData.west.temperature * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.west.temperature < 0.3 ? 'froid' : surroundingCellsAtmosphericData.west.temperature > 0.7 ? 'chaud' : 'tempéré'})
+      * Pression: ${(surroundingCellsAtmosphericData.west.pressure * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.west.pressure < 0.3 ? 'basse' : surroundingCellsAtmosphericData.west.pressure > 0.7 ? 'haute' : 'normale'})
+      * Turbulence: ${(surroundingCellsAtmosphericData.west.turbulence * 100).toFixed(0)}% (${surroundingCellsAtmosphericData.west.turbulence < 0.3 ? 'calme' : surroundingCellsAtmosphericData.west.turbulence > 0.7 ? 'agité' : 'stable'})
 - Inventaire: ${context?.playerInventory?.map(item => `${item.name} - ${item.description}`).join(", ")}
 
 INSTRUCTIONS:
@@ -111,7 +155,7 @@ Réponds TOUJOURS en JSON avec cette structure:
     "title": "string",
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
     "mapCharacter": "single ASCII char",
-  } | null, // null si le joueur ne modifie pas la cellule
+  } | null, // null si le joueur ne modifie pas la cellule, ne modifie le titre et la description que si c'est nécessaire
   "newTrace": {
     "type": "LOOT" | "MESSAGE" | "OTHER",
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)", // description de la trace et du message si type est MESSAGE
@@ -204,6 +248,7 @@ export async function processUserPrompt(
       user: user,
       currentLocation: user.worldCell?.title,
       previousMessages: recentJournal.slice(-6).map(entry => entry.content),
+      playerPosition: user.worldCell ? { x: user.worldCell.x, y: user.worldCell.y } : undefined,
       playerInventory: user.inventory,
       currentCell: user.worldCell || undefined,
       surroundingCells: surroundingCells

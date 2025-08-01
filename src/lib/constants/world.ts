@@ -124,5 +124,36 @@ export const MAP_DISPLAY = {
   DEFAULT_VIEWPORT_SIZE: 20
 } as const
 
-// 🎮 Rarity types for TypeScript
+// 🌊 Atmospheric System - Perlin Noise Configuration
+export const ATMOSPHERIC_NOISE_CONFIG = {
+  // Base seeds for different atmospheric layers
+  SEEDS: {
+    HUMIDITY: 12345,
+    TEMPERATURE: 67890,
+    PRESSURE: 54321,
+    TURBULENCE: 98765
+  },
+  
+  // Scale factors for noise (smaller = more zoomed out patterns)
+  SCALES: {
+    HUMIDITY: 0.05,      // Large moisture patterns
+    TEMPERATURE: 0.03,    // Very large temperature zones  
+    PRESSURE: 0.08,       // Medium pressure systems
+    TURBULENCE: 0.12      // Smaller, more chaotic patterns
+  },
+  
+  // Animation speeds (how much time offset affects each layer)
+  ANIMATION_SPEEDS: {
+    HUMIDITY: 0.1,        // Slow-moving moisture
+    TEMPERATURE: 0.05,    // Very slow temperature changes
+    PRESSURE: 0.15,       // Faster pressure changes
+    TURBULENCE: 0.25      // Quick turbulence shifts
+  },
+  
+  // How often the noise animates (in hours)
+  ANIMATION_INTERVAL_HOURS: 3
+} as const
+
+// 🎮 Types for TypeScript
 export type RarityType = keyof typeof RARITY_WEIGHTS
+export type AtmosphericLayer = keyof typeof ATMOSPHERIC_NOISE_CONFIG.SEEDS

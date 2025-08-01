@@ -119,3 +119,26 @@ export async function updateWorldCell(id: string, data: Partial<WorldCell>): Pro
   })
   return cell
 }
+
+/**
+ * 🌡️ Gets current atmospheric data for a specific cell
+ */
+export async function getCellAtmosphericData(x: number, y: number): Promise<{
+  humidity: number
+  temperature: number
+  pressure: number
+  turbulence: number
+} | null> {
+  try {
+    const cell = await fetchWorldCell(x, y)
+    if (!cell) {
+      return null
+    }
+
+    const { calculateAtmosphericData } = await import("@/lib/helper")
+    return calculateAtmosphericData(x, y)
+  } catch (error) {
+    console.error(`❌ Error getting atmospheric data for cell (${x}, ${y}):`, error)
+    return null
+  }
+}
