@@ -138,7 +138,9 @@ INSTRUCTIONS:
 5. Considère l'influence des cellules environnantes sur la génération
 6. Si le joueur fait quelque chose qui pourrait laisser une trace signifiante, génère une trace avec le type approprié
 7. Si le joueur fait quelque chose qui impacterait majoritairement la cellule, modifie la description de la cellule, et le titre si nécessaire
-8. **IMPORTANT**: Mentionne les traces visibles dans ta narration quand c'est pertinent (empreintes, objets abandonnés, messages, etc.) si il n'y en a pas, ne mentionne pas les traces
+8. Interprète la météo d'apres les données atmosphériques et si c'est pertinent (si une des données est très éloignée de la normale, ou si c'est interressant), mentionne-la dans ta narration. Ne mentionne pas directement les données atmosphériques dans ta narration.
+9. Ne mentionne pas non plus le titre du lieu directement dans ta narration.
+10. **IMPORTANT**: Mentionne les traces visibles dans ta narration quand c'est pertinent (empreintes, objets abandonnés, messages, etc.) si il n'y en a pas, ne mentionne pas les traces
 
 La rareté est la suivante :
 ${rarityExplanation}
@@ -164,7 +166,7 @@ Réponds TOUJOURS en JSON avec cette structure:
     "name": "string",
     "description": "string (max ${GENERATION_CONFIG.MAX_DESCRIPTION_WORDS} mots)",
   } | null, // null si le joueur ne récupère pas d'objet
-  "narration": "Réponse immersive complète au joueur en te basant sur le contexte actuel et l'input du joueur. Mentionne les traces visibles si pertinent."
+  "narration": "Réponse immersive complète au joueur en te basant sur le contexte actuel en interprettant la météo d'apres les données atmosphériques et l'input du joueur. Mentionne les traces visibles si pertinent."
 }
 
 Contexte actuel: ${context?.currentLocation || 'Début de l\'aventure'}
