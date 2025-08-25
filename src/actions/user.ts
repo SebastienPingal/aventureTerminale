@@ -10,6 +10,7 @@ import { ASCII_ART, INTRO_TEXT, STARTER_LOCATIONS } from "@/lib/constants/world"
 import { createJournalEntry } from "./journalEntry"
 import { JournalEntryType } from "@prisma/client"
 import { createWorldCell } from "./worldCell"
+import { publishPresenceEventKafka } from "@/lib/events/presenceKafka"
 
 export async function getUser(id: Prisma.UserWhereUniqueInput): Promise<ExtendedUser | null> {
   const user = await prisma.user.findUnique({
@@ -124,6 +125,13 @@ export async function initializeUserPosition(userId: string): Promise<ExtendedUs
         inventory: true,
         journal: true
       }
+    })
+
+    await publishPresenceEventKafka({
+      type: 'user_entered',
+      worldCellId: worldCell.id,
+      userId,
+      at: new Date().toISOString()
     })
 
     console.log(`✅ User ${userId} placed at random position (${x}, ${y}) - ${worldCell.title}`)

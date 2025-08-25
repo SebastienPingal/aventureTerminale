@@ -12,6 +12,7 @@ import { fetchWorldCell, createWorldCell, updateWorldCell } from "./worldCell"
 import { createUserTrace } from "./traces"
 import { createAndAddObjectToInventory } from "./object"
 import { ExtendedUser } from "@/lib/types"
+import { publishPresenceEventKafka } from "@/lib/events/presenceKafka"
 
 const together = new Together()
 
@@ -390,9 +391,27 @@ async function handleMovement(
       )
     }
 
+    const previousCell = user.worldCell
+
     // Move user to new cell
     await updateUser({ id: user.id }, {
       worldCell: { connect: { x_y: { x: newX, y: newY } } }
+    })
+
+    if (previousCell) {
+      await publishPresenceEventKafka({
+        type: 'user_left',
+        worldCellId: previousCell.id,
+        userId: user.id,
+        at: new Date().toISOString()
+      })
+    }
+
+    await publishPresenceEventKafka({
+      type: 'user_entered',
+      worldCellId: targetCell.id,
+      userId: user.id,
+      at: new Date().toISOString()
     })
 
     console.log(`🏜️ User moved ${direction} to (${newX},${newY})`)
