@@ -8,7 +8,6 @@ import { JournalProvider } from "@/contexts/JournalContext"
 import { UserProvider } from "@/contexts/UserContext"
 import { WorldCellProvider } from "@/contexts/WorldCellContext"
 import Header from "@/components/Header"
-import PresenceJournalListener from "@/components/PresenceJournalListener"
 
 const rubikDirt = Rubik_Dirt({
   variable: "--font-rubik-dirt",
@@ -54,7 +53,6 @@ export default async function RootLayout({
                     <div className="flex flex-col items-center max-w-6xl mx-auto flex-1 overflow-y-auto w-full">
                       {children}
                     </div>
-                    <PresenceJournalListener />
                   </UserSessionManager>
                 </WorldCellProvider>
               </UserProvider>
